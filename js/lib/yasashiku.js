@@ -239,7 +239,7 @@ function Yasashiku (){
             if(!isNumber(delay)){
                 delay = 0;
             }
-            setTimeout(playDelay, delay);
+            setTimeout(playDelay, delay*1000);
         }
 
         this.stop = function(){

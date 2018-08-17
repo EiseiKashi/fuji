@@ -37,26 +37,43 @@ var changeFont = function(){
 //changeFont();
 
 //========================================
-var titleContainer = document.createElement("section");
-    titleContainer.style.position = "relative";
+var TitleBottom = function(text, size, width, direction){
+    var titleContainer = document.createElement("section");
+    titleContainer.style.position   = "relative";
     titleContainer.style.fontFamily = fontList[0];
-    titleContainer.style.fontSize = "20px";
-    titleContainer.style.width = "200px";
-    titleContainer.style.height = "40px";
-    titleContainer.style.overflow = "hidden";
+    titleContainer.style.fontSize   = size +"px";
+    titleContainer.style.width      = width + "px";
+    titleContainer.style.height     = (size*2)+"px";
+    titleContainer.style.overflow   = "hidden";
 
-var title = document.createElement("h1");
-    title.innerHTML = "SAKURA";
-    title.style.position = "relative";
+    var title = document.createElement("h1");
+        title.innerHTML = text;
+        title.style.position = "relative";
 
-titleContainer.appendChild(title);
+    titleContainer.appendChild(title);
 
-document.body.appendChild(titleContainer);
-title.style.bottom = "-40px";
-title.style.opacity = 0;
-var state = {bottom:"0px", opacity:1};
-var titleAnimation = new Yasashiku();
-    titleAnimation.formula = "outBack";
-    titleAnimation.add(title.style, state);
+    document.body.appendChild(titleContainer);
+    title.style.bottom = -(size*2)+"px";
+    title.style.opacity = 0;
+    var state = {bottom:"0px", opacity:1};
+    var titleAnimation = new Yasashiku();
+        titleAnimation.formula = "outBack";
+        titleAnimation.add(title.style, state);
+        
+    this.play = function(seconds, delay){
+        titleAnimation.play(seconds, delay);
+    }
 
-titleAnimation.play(0.7);
+    this.textStyle = title.style;
+    this.containerStyle = titleContainer.style;
+}
+
+title0 = new TitleBottom("SAKURA", 20, 200);
+title1 = new TitleBottom("code", 10, 200);
+title2 = new TitleBottom("code", 5, 200);
+
+title0.play(.7, 5)
+
+title1.play(.7, 5.5)
+
+title2.play(.7, 6)
