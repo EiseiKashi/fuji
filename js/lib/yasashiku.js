@@ -155,7 +155,7 @@ function Yasashiku (){
     // bounce easing in
     // t: current time, b: beginning value, c: change in position, d: duration
     Math.inBounce = function (t, b, c, d) {
-        return c - Math.oOutBounce (d-t, 0, c, d) + b;
+        return c - Math.outBounce (d-t, 0, c, d) + b;
     };
     // bounce easing out
     Math.outBounce = function (t, b, c, d) {
@@ -222,6 +222,7 @@ function Yasashiku (){
         var playDelay = function(){
             _active         = true;
             _formula        = Math[_formulaName];
+            console.log(_formulaName);
             _lastTime       = Date.now();
             _lapsed         = 0;
 

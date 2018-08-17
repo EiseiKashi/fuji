@@ -13,8 +13,8 @@ function Fuji (){
         var _fontSize   = "36px";
         var _width      = "100px";
         var _height     = (parseFloat(_fontSize)*2)+"px";
-        var _from       = "bottom";
-        var _position   = "-"+_height;
+        var _from       = "left";
+        var _position   = "-"+_width;
         var _formula    = "outBack";
         var _element    = document.body;
         var _animation  = new Yasashiku();
@@ -31,6 +31,8 @@ function Fuji (){
         this.width      = _width;
         this.height     = _height;
         this.formula    = _formula;
+        this.formulaIn;
+        this.formulaOut;
         this.from       = _from;
         
         _label                      = document.createElement("fuji-label");
@@ -81,27 +83,31 @@ function Fuji (){
                 }
             }
             
+            _self.formula = _self.formulaIn;
             if(_self.formula != _formula){
                 _formula = _self.formula;
             }
             
             if(_self.from != _from){
+                _from = _self.from;
                 switch(_from){
                     case "top" :
-                    _position   = _fontSize*2;        
+                    _position   = "-"+_height;        
                     break;
                     
                     case "right" :
+                    _from       = "left";
                     _position   = _width;      
                     break;
                     
                     case "bottom" :
-                    _position   = -_fontSize*2;        
+                    _from       = "top";
+                    _position   = _height;    
                     break;
                     
                     case "left" :
                     default:
-                    _position   = -_width;      
+                    _position   = "-"+_width;      
                     break;
                 }
             }
@@ -109,6 +115,7 @@ function Fuji (){
             _label.innerHTML            = _text;
 
             _styleLabel[_from]          = _position;
+
             _styleLabel.opacity         = 0;
 
             _styleContainer.fontFamily  = _fontFamily;
@@ -131,6 +138,13 @@ function Fuji (){
         this.playOut = function(seconds, delay){
             _state[_from]   = _position;
             _state.opacity  = 0;
+            
+            _self.formula = _self.formulaOut;
+            if(_self.formula != _formula){
+                _formula = _self.formula;
+            }
+            _animation.formula = _formula;
+            console.log(_formula);
             _animation.play(seconds, delay);
         }
     }
