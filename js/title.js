@@ -37,6 +37,7 @@ var changeFont = function(){
 //changeFont();
 
 //========================================
+/*
 var TitleBottom = function(text){
     var _text = text == null ? "" : text;
     
@@ -79,3 +80,9 @@ title0.play(.7, 5)
 title1.play(.7, 5.5)
 
 title2.play(.7, 6)
+*/
+
+var fuji    = new Fuji();
+var label   = fuji.createLabel("SAKURA");
+    label.width = "150px";
+    label.playIn(0.7)
