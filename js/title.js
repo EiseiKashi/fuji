@@ -37,7 +37,9 @@ var changeFont = function(){
 //changeFont();
 
 //========================================
-var TitleBottom = function(text, size, width, direction){
+var TitleBottom = function(text){
+    var _text = text == null ? "" : text;
+    
     var titleContainer = document.createElement("section");
     titleContainer.style.position   = "relative";
     titleContainer.style.fontFamily = fontList[0];
