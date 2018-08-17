@@ -129,8 +129,8 @@ function Fuji (){
         }
 
         this.playOut = function(seconds, delay){
-            _styleLabel[_from]          = 0+"px";
-            _styleLabel.opacity         = 0;
+            _state[_from]   = _position;
+            _state.opacity  = 0;
             _animation.play(seconds, delay);
         }
     }
