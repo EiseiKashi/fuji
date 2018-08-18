@@ -1262,7 +1262,6 @@ window.Canvate = function(element) {
                 _cropHeight = cropDataRender.height;
             }catch(error){
                 var name = this.name;
-                //debugger
             }
             
             // FRAME RENDER

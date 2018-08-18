@@ -177,6 +177,12 @@ function Yasashiku (){
 
     function Yasashiku(){
         'use strict'
+        this.EVENT_START    = "start";
+        this.EVENT_COMPLETE = "complete";
+        this.EVENT_TICK     = "tick";
+        this.EVENT_STOP     = "stop";
+        this.EVENT_PAUSE    = "pause";
+
         var _self           = this;
         var _emitter        = new Emitter(this);
         var _stateList      = [];
@@ -223,7 +229,6 @@ function Yasashiku (){
         var playDelay = function(){
             _active         = true;
             _formula        = Math[_formulaName];
-            console.log(_formulaName);
             _lastTime       = Date.now();
             _lapsed         = 0;
 
@@ -232,7 +237,7 @@ function Yasashiku (){
                 _stateList[index].update();
             }
             update();
-            emit("start");
+            emit(_self.EVENT_START);
         }
 
         this.play = function(seconds, delay){
@@ -248,12 +253,12 @@ function Yasashiku (){
             cancelAnimationFrame(_idTime);
             _active     = false;
             _duration   = 0;
-            emit("stop");
+            emit(_self.EVENT_STOP);
         }
 
         this.pause = function(){
             _active = false;
-            emit("pause");
+            emit(_self.EVENT_PAUSE);
         }
 
         this.addEventListener = function(type, listener, context){
@@ -335,16 +340,18 @@ function Yasashiku (){
                 }
             }
 
-            emit("tick");
+            
 
             if(!_active){
                 _isLast = true;
                 _self.stop();
-                emit("complete");
-                emit("tick");
+                emit(_self.EVENT_COMPLETE);
+                emit(_self.EVENT_TICK);
                 _isLast = false;
+                cancelAnimationFrame(_idTime);
             }else{
                 _idTime = requestAnimationFrame(update);
+                emit(_self.EVENT_TICK);
             }
             
         }

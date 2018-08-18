@@ -9,7 +9,16 @@ function Fuji (){
     var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
 
     function Label (text){
+        this.ANIMATION_WORD    = "word";
+        this.ANIMATION_RANDOM  = "random";
+        this.ANIMATION_LINEAR  = "linear";
+        this.EVENT_IN_START    = "inStart";
+        this.EVENT_IN_END      = "inEnd";
+        this.EVENT_OUT_START   = "inStart";
+        this.EVENT_OUT_END     = "outEnd";
+
         var _self       = this;
+        var _emitter    = new Emitter(this);
         var _text       = text == null ? "Label" : text;
         var _fontFamily = fontList[2];
         var _fontSize   = "36px";
@@ -21,6 +30,7 @@ function Fuji (){
         var _element    = document.body;
         var _animation  = new Yasashiku();
         var _state      = {};
+        var _isOut;
 
         var _label;
         var _container;
@@ -60,8 +70,7 @@ function Fuji (){
             }
         }
 
-        var doPlay;
-        this.playIn = function(seconds, delay){
+        var setPlay = function(){
             clearInterval(_intervalId);
             if(_self.text != _text){
                 _text = _self.text;
@@ -89,48 +98,77 @@ function Fuji (){
                 }
             }
             
-            _self.formula = _self.formulaIn;
-            if(_self.formula != _formula){
-                _formula = _self.formula;
-            }
-
             _label.innerHTML            = _text;
             _styleContainer.fontFamily  = _fontFamily;
             _styleContainer.fontSize    = _fontSize;
             _styleContainer.width       = _width;
             _styleContainer.height      = _height;
-            _animation.formula          = _formula
             if(!_element.contains(_container)){
                 _element.appendChild(_container);    
             }
+        }
 
+        this.playIn = function(seconds, delay){
+            _isOut = false;
+            
+            setPlay();
+
+            _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
+            clearInterval(_intervalId);
+            
             switch(this.animationType){
-                case Label.ANIMATION_WORD :
+                case _self.ANIMATION_WORD :
                     doPlay = wordIn; 
                     break;
-                default:
-                     doPlay = wordIn; 
+                case _self.ANIMATION_LINEAR :
+                case _self.ANIMATION_RANDOM :
+                    doPlay = charIn; 
+                    break;
+                default: 
+                    doPlay = wordIn; 
             }
-            doPlay = randomCharIn;
+            emit(_self.EVENT_IN_START);
             doPlay.apply(this, [seconds, delay]);
         }
 
         this.playOut = function(seconds, delay){
+            _isOut = true;
+            
+            setPlay();
+
+            _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
             clearInterval(_intervalId);
+
             switch(this.animationType){
-                case Label.ANIMATION_WORD :
+                case _self.ANIMATION_WORD :
                     doPlay = wordOut; 
+                    break;
+                case _self.ANIMATION_LINEAR :
+                case _self.ANIMATION_RANDOM :
+                    doPlay = charOut; 
                     break;
                 default: 
                     doPlay = wordOut; 
             }
-            doPlay = randomCharOut;
+            emit(_self.EVENT_OUT_START);
             doPlay.apply(this, [seconds, delay]);
         }
 
         // WORD ANIMATION
         {
-            var wordIn = function(seconds, delay){
+            var onAnimationComplete = function(){
+                var type = _isOut ? _self.EVENT_OUT_END : _self.EVENT_IN_END; 
+                emit(type);
+                _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
+            }
+
+            var setWordAnimation = function(){
+                _self.formula = _self.formulaIn;
+                if(_self.formula != _formula){
+                    _formula = _self.formula;
+                }
+                _animation.formula = _formula;
+
                 if(_self.from != _from){
                     _from = _self.from;
                     switch(_from){
@@ -155,28 +193,28 @@ function Fuji (){
                     }
                 }
                 
-                _styleLabel[_from]          = _position;
-                _styleLabel.opacity         = 0;
-                _state[_from]               = 0+"px";
-                _state.opacity              = 1;
-                
+            }
+
+            var wordIn = function(seconds, delay){
+                setWordAnimation();
+                _state[_from]       = 0+"px";
+                _state.opacity      = 1;
+
+                _styleLabel[_from]  = _position;
+                _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
                 _animation.play(seconds, delay);
             }
+
             var wordOut = function(seconds, delay){
+                setWordAnimation();
                 _state[_from]   = _position;
                 _state.opacity  = 0;
-                
-                _self.formula = _self.formulaOut;
-                if(_self.formula != _formula){
-                    _formula = _self.formula;
-                }
-                _animation.formula = _formula;
-                console.log(_formula);
+                _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
                 _animation.play(seconds, delay);
             }
         }
 
-        // RANDOM CHARACTER
+        // CHARACTER RANDOM and LINEAR
         {
             var counter;
             var charIndex;
@@ -189,7 +227,7 @@ function Fuji (){
             var onOrderChar = function(isFirst){
                 var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
                 if(++counter%times == 0){
-                    word[currentIndex] = isOut ? "" : _text.charAt(currentIndex);
+                    word[currentIndex] = _isOut ? "" : _text.charAt(currentIndex);
                     currentIndex += increment;
                     charCounter ++;
                 }else{
@@ -199,33 +237,19 @@ function Fuji (){
 
                 if(charCounter == top){
                     clearInterval(_intervalId);
-                    _label.innerHTML = isOut ? "" : _text;
-                    console.log("OWATTA!!!")
+                    _label.innerHTML = _isOut ? "" : _text;
                 }
             }
 
             var onRandomChar = function(isFirst){
                 var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
                 if(++counter%times == 0){
-
-                    console.log("Before: ", currentIndex)
                     
                     charIndex = randomIndex[currentIndex];
-                    
-                    console.log("USE: ", charIndex);
-                    
-                    word[charIndex] = isOut ? "" : _text.charAt(charIndex);
+                    word[charIndex] = _isOut ? "" : _text.charAt(charIndex);
                     randomIndex.splice(currentIndex, 1);
-                    
-                    console.log("After: ", randomIndex)
-                    
                     currentIndex = Math.floor(Math.random()*randomIndex.length);
                     charIndex = randomIndex[currentIndex];
-                    
-                    console.log("Random:", charIndex);
-                    console.log(_text.length);
-                    console.log("))(((((((((((((")
-                    console.log(".")
                     charCounter ++;
                 }else{
                     word[charIndex] = char;
@@ -237,11 +261,9 @@ function Fuji (){
                 }
             }
             
-            var randomCharIn = function(seconds, delay){
-                isOut = false;
+            var charIn = function(seconds, delay){
                 _label.innerHTML    = "";
-                word                = new Array(_text.length).join(">").split("");
-                console.log(word)
+                word                = new Array(_text.length).join(" ").split("");
                 _styleLabel.opacity = 1;
                 _styleLabel.left    = 0;
                 _styleLabel.top     = 0;
@@ -252,22 +274,32 @@ function Fuji (){
 
                 top         = _text.length;
                 increment   = 1;
-                times       = 3;
+                times       = 5;
                 counter     = 0;
                 charCounter = 0;
 
-                randomIndex = [];
-                for(var index = 0; index<top; index++){
-                    randomIndex.push(index);
+                var method; 
+                
+                if(Label.ANIMATION_LINEAR){
+                    currentIndex    = 0;
+                    method = onOrderChar;
+                }
+                
+                if(Label.ANIMATION_RANDOM){
+                    randomIndex = [];
+                    for(var index=0; index<top; index++){
+                        randomIndex.push(index);
+                    }
+                    currentIndex = Math.floor(Math.random()*randomIndex.length);
+                    method = onRandomChar;
                 }
 
-                currentIndex    = 0//Math.floor(Math.random()*randomIndex.length);
                 var interval    = (seconds/(top*times))*1000;
-                _intervalId     = setInterval(onOrderChar, interval);
+                _intervalId     = setInterval(method, interval);
             }
 
-            var randomCharOut = function(seconds, delay){
-                isOut = true;
+            var charOut = function(seconds, delay){
+                 _isOut             = true;
                 _styleLabel.opacity = 1;
                 _styleLabel.left    = 0;
                 _styleLabel.top     = 0;
@@ -282,10 +314,21 @@ function Fuji (){
                 _intervalId = setInterval(onOrderChar, interval);
             }
         }
+
+        // Event emitter
+        this.addEventListener = function(type, listener, context){
+            _emitter.addEventListener(type, listener, context);
+        }
+
+        this.removeEventListener = function(type, listener, context){
+            _emitter.removeEventListener(type, listener, context);
+        }
+
+        var emit = function(type){
+            _emitter.emit(type)
+        }
     }
 
-    Label.ANIMATION_WORD  = "word";
-    
     this.createLabel = function(text, container){
         var label = new Label(text);
             label.appendTo(container);

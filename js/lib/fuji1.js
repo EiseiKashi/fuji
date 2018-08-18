@@ -168,7 +168,6 @@ function Fuji (){
                     _formula = _self.formula;
                 }
                 _animation.formula = _formula;
-                console.log(_formula);
                 _animation.play(seconds, delay);
             }
         }
@@ -208,7 +207,6 @@ function Fuji (){
                 isOut = false;
                 _label.innerHTML    = "";
                 word                = new Array(_text.length).join(" ").split("");
-                console.log(word)
                 _styleLabel.opacity = 1;
                 _styleLabel.left    = 0;
                 _styleLabel.top     = 0;

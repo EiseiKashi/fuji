@@ -365,13 +365,10 @@ var maxOffset = worldWidth/4
 var onLeftDown = function(event){
 	
 	shinkansen.offsetX -= 2;
-	console.log(shinkansen.offsetX)
 }
 
 var onRightDown = function(event){
 	shinkansen.offsetX += 2;
-
-	console.log(shinkansen.offsetX)
 }
 
 
