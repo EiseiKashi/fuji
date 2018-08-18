@@ -184,6 +184,7 @@ function Yasashiku (){
         var _lapsed         = 0;
         var _duration       = 1000;
         var _ratio          = 0;
+        var _isLast         = false;
         var _formulaName    = "inOutQuad";
         var _formula        = Math[_formulaName];
         var _active         = false;
@@ -264,7 +265,7 @@ function Yasashiku (){
         }
 
         var emit = function(type){
-            _emitter.emit(type, {ratio:_ratio, milliseconds:_duration});
+            _emitter.emit(type, {ratio:_ratio, milliseconds:_duration, isLast:_isLast});
         }
 
         var laps;
@@ -337,8 +338,11 @@ function Yasashiku (){
             emit("tick");
 
             if(!_active){
+                _isLast = true;
                 _self.stop();
                 emit("complete");
+                emit("tick");
+                _isLast = false;
             }else{
                 _idTime = requestAnimationFrame(update);
             }

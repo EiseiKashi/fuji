@@ -6,12 +6,12 @@ function Fuji (){
        ,"'Share Tech', monospace"
     ]
 
-    var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
+    var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
 
     function Label (text){
         var _self       = this;
         var _text       = text == null ? "Label" : text;
-        var _fontFamily = fontList[2];
+        var _fontFamily = fontList[0];
         var _fontSize   = "36px";
         var _width      = "100px";
         var _height     = (parseFloat(_fontSize)*2)+"px";
@@ -26,7 +26,6 @@ function Fuji (){
         var _container;
         var _styleContainer;
         var _styleLabel;
-        var _intervalId;
         
         this.text           = _text;
         this.fontFamily     = _fontFamily;
@@ -62,7 +61,6 @@ function Fuji (){
 
         var doPlay;
         this.playIn = function(seconds, delay){
-            clearInterval(_intervalId);
             if(_self.text != _text){
                 _text = _self.text;
             }
@@ -116,7 +114,6 @@ function Fuji (){
         }
 
         this.playOut = function(seconds, delay){
-            clearInterval(_intervalId);
             switch(this.animationType){
                 case Label.ANIMATION_WORD :
                     doPlay = wordOut; 
@@ -178,69 +175,39 @@ function Fuji (){
 
         // RANDOM CHARACTER
         {
-            var counter;
-            var charIndex;
-            var currentIndex;
-            var increment;
-            var times;
-            var top;
-            var charCounter;
-            var randomIndex;
-            var onOrderChar = function(isFirst){
+            var text;
+            var word;
+            var isOut;
+            var onTickChar = function(event){
+                if(event.isLast){
+                    _label.innerHTML = text;
+                    if(isOut){
+                        _label.innerHTML = "";
+                    }
+                    _animation.removeEventListener("tick", onTickChar);
+                    return;
+                }
+                
                 var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
-                if(++counter%times == 0){
-                    word[currentIndex] = isOut ? "" : _text.charAt(currentIndex);
-                    currentIndex += increment;
-                    charCounter ++;
+                var index = Math.floor(Math.random()*text.length);
+
+                if(null != word[index]){
+                    word[index] = text.charAt(index);
                 }else{
-                    word[currentIndex] = char;
+                    word[index] = char;
                 }
-                _label.innerHTML = word.join("");
+                var temp        = word.join("");
+                _label.innerHTML = temp;
+                if(temp == text){
+                    _animation.removeEventListener("tick", onTickChar);
 
-                if(charCounter == top){
-                    clearInterval(_intervalId);
-                    _label.innerHTML = isOut ? "" : _text;
-                    console.log("OWATTA!!!")
-                }
-            }
-
-            var onRandomChar = function(isFirst){
-                var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
-                if(++counter%times == 0){
-
-                    console.log("Before: ", currentIndex)
-                    
-                    charIndex = randomIndex[currentIndex];
-                    
-                    console.log("USE: ", charIndex);
-                    
-                    word[charIndex] = isOut ? "" : _text.charAt(charIndex);
-                    randomIndex.splice(currentIndex, 1);
-                    
-                    console.log("After: ", randomIndex)
-                    
-                    currentIndex = Math.floor(Math.random()*randomIndex.length);
-                    charIndex = randomIndex[currentIndex];
-                    
-                    console.log("Random:", charIndex);
-                    console.log(_text.length);
-                    console.log("))(((((((((((((")
-                    console.log(".")
-                    charCounter ++;
-                }else{
-                    word[charIndex] = char;
-                }
-                _label.innerHTML = word.join("");
-
-                if(charCounter == top){
-                    clearInterval(_intervalId);
                 }
             }
             
             var randomCharIn = function(seconds, delay){
                 isOut = false;
                 _label.innerHTML    = "";
-                word                = new Array(_text.length).join(">").split("");
+                word                = new Array(_text.length).join(" ").split("");
                 console.log(word)
                 _styleLabel.opacity = 1;
                 _styleLabel.left    = 0;
@@ -250,20 +217,9 @@ function Fuji (){
                     _element.appendChild(_container);    
                 }
 
-                top         = _text.length;
-                increment   = 1;
-                times       = 3;
-                counter     = 0;
-                charCounter = 0;
-
-                randomIndex = [];
-                for(var index = 0; index<top; index++){
-                    randomIndex.push(index);
-                }
-
-                currentIndex    = 0//Math.floor(Math.random()*randomIndex.length);
-                var interval    = (seconds/(top*times))*1000;
-                _intervalId     = setInterval(onOrderChar, interval);
+                _animation.removeEventListener("tick", onTickChar);
+                _animation.addEventListener("tick", onTickChar);
+                _animation.play(seconds, delay);
             }
 
             var randomCharOut = function(seconds, delay){
@@ -272,14 +228,9 @@ function Fuji (){
                 _styleLabel.left    = 0;
                 _styleLabel.top     = 0;
 
-                top         = _text.length;
-                increment   = -1;
-                times       = 3;
-                index       = _text.length;
-                counter     = 0;
-                charCounter = 0;
-                var interval = (seconds/(top*times))*1000;
-                _intervalId = setInterval(onOrderChar, interval);
+                _animation.removeEventListener("tick", onTickChar);
+                _animation.addEventListener("tick", onTickChar);
+                _animation.play(seconds, delay);
             }
         }
     }
