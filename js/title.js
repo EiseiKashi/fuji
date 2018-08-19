@@ -1,5 +1,5 @@
 function onLastFiniched(event){
-    event.target.playOut(1.2)
+    event.target.playOut(1.2, 2)
 }
 
 var fuji    = new Fuji();
@@ -8,7 +8,7 @@ var delay = 0;
 
 var label0              = fuji.createLabel("Ayumi Kotegawa");
     label0.width        = "500px";
-    label0.from         = "top";
+    label0.from         = "left";
     label0.formulaOut   = "outBack";
 
 var label = label0;

@@ -168,31 +168,27 @@ function Fuji (){
                     _formula = _self.formula;
                 }
                 _animation.formula = _formula;
-
-                if(_self.from != _from){
-                    _from = _self.from;
-                    switch(_from){
-                        case "top" :
-                        _position   = "-"+_height;        
-                        break;
-                        
-                        case "right" :
-                        _from       = "left";
-                        _position   = _width;      
-                        break;
-                        
-                        case "bottom" :
-                        _from       = "top";
-                        _position   = _height;    
-                        break;
-                        
-                        case "left" :
-                        default:
-                        _position   = "-"+_width;      
-                        break;
-                    }
-                }
-                
+                _from = _self.from;
+                switch(_from){
+                    case "top" :
+                    _position   = "-"+_height;        
+                    break;
+                    
+                    case "right" :
+                    _from       = " ";
+                    _position   = _width;      
+                    break;
+                    
+                    case "bottom" :
+                    _from       = "top";
+                    _position   = _height;    
+                    break;
+                    
+                    case "left" :
+                    default:
+                    _position   = "-"+_width;
+                    break;
+                }   
             }
 
             var wordIn = function(seconds, delay){
