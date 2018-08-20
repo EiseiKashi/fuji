@@ -2,75 +2,71 @@
 var WordAnimation = function(label, animation, state) {
     'strict mode'
     var _self       = this;
-    var _animation  = animation;
-    var _state      = state;
+    var _styleLabel = label.styleLabel;
+    var _from;
 
     var _isOut;
     var _position;
+
+    animation.addEventListener(animation.EVENT_COMPLETE, onAnimationComplete);
 
     this.playIn = function(seconds, delay){
         _isOut = false;
 
         setAnimation();
         
-        var from            = label.from;
-        _state[from]        = 0+"px";
-        _state.opacity      = 1;
-        _styleLabel[from]   = _position;
-        
-        _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
-        _animation.play(seconds, delay);
+        state[_from]        = 0+"px";
+        state.opacity       = 1;
+        _styleLabel[_from]  = _position;
+        animation.play(seconds, delay);
     }
 
     this.playOut = function(seconds, delay){
+        _isOut = true;
         setAnimation();
 
-        _state[label.from]  = _position;
-        _state.opacity      = 0;
-
-        _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
-        _animation.play(seconds, delay);
+        state[_from]    = _position;
+        state.opacity   = 0;
+        animation.play(seconds, delay);
     }
 
     this.stop = function(){
-        _animation.stop();
-        _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
+        animation.stop();
     }
 
-    var setAnimation = function(){
+    this.onComplete = function (type){
+    }
+    
+    function setAnimation (){
+        _from = label.from;
         switch(_from){
             case "top" :
-                _from       = "top";
-                _position   = "-"+_height;        
+                _position   = "-"+label.height;        
             break;
             
             case "right" :
                 _from       = "left";
-                _position   = _width;      
+                _position   = label.width;      
             break;
             
             case "bottom" :
                 _from       = "top";
-                _position   = _height;    
+                _position   = label.height;    
             break;
             
             case "left" :
-                _position   = "-"+_width;
+                _position   = "-"+ label.width;
             break;
 
            default :
-                _from       = "left";
-                _position   = "-"+_width;
+                _position   = "-"+label.width;
             break;
-        }   
-    }
-    
-    var onAnimationComplete = function(){
-        var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END; 
-        _self.onComplete(type);
-        _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
+        }
     }
 
-    this.onComplete = function(type){
+    function onAnimationComplete(){
+        var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
+        console.log(type, " ANIMATION COMPLETE");
+        _self.onComplete(type);
     }
 }

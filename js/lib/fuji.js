@@ -8,7 +8,7 @@ function Fuji (){
 
     var EVENT_IN_START  = "inStart";
     var EVENT_IN_END    = "inEnd";
-    var EVENT_OUT_START = "inStart";
+    var EVENT_OUT_START = "outStart";
     var EVENT_OUT_END   = "outEnd";
 
     var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
@@ -33,7 +33,8 @@ function Fuji (){
         var _position   = "-"+_width;
         var _formula    = "outBack";
         var _element    = document.body;
-        var _animation  = new Yasashiku();
+        var _yasashiku  = new Yasashiku();
+        var _animation;
         var _state      = {};
         var _isOut;
 
@@ -72,7 +73,13 @@ function Fuji (){
         this.styleLabel             = _styleLabel;
         this.styleContainer         = _styleContainer;
 
-        _animation.add(_styleLabel, _state);
+        _yasashiku.add(_styleLabel, _state);
+
+        _animation = new WordAnimation(this, _yasashiku, _state);
+        _animation.onComplete = function(type){
+            console.log("FUJI ", type);
+            emit(type);
+        };
 
         this.appendTo = function (element){
             if(null != element && element != _element && typeof element.appendChild == "function"){
@@ -113,14 +120,14 @@ function Fuji (){
                 _formula = _self.formula;
             }
 
-            _animation.formula = _formula;
-            _from = _self.from;
-            
+            _yasashiku.formula          = _formula;
+            _from                       = _self.from;
             _label.innerHTML            = _text;
             _styleContainer.fontFamily  = _fontFamily;
             _styleContainer.fontSize    = _fontSize;
             _styleContainer.width       = _width;
             _styleContainer.height      = _height;
+
             if(!_element.contains(_container)){
                 _element.appendChild(_container);    
             }
@@ -131,7 +138,6 @@ function Fuji (){
             
             setPlay();
 
-            _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
             clearInterval(_intervalId);
             
             switch(this.animationType){
@@ -154,7 +160,6 @@ function Fuji (){
             
             setPlay();
 
-            _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
             clearInterval(_intervalId);
 
             switch(this.animationType){
@@ -174,62 +179,12 @@ function Fuji (){
 
         // WORD ANIMATION
         {
-            var onAnimationComplete = function(){
-                var type = _isOut ? _self.EVENT_OUT_END : _self.EVENT_IN_END; 
-                emit(type);
-                _animation.removeEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
-            }
-
-            var setWordAnimation = function(){
-                _self.formula = _self.formulaIn;
-                if(_self.formula != _formula){
-                    _formula = _self.formula;
-                }
-                _animation.formula = _formula;
-                _from = _self.from;
-                switch(_from){
-                    case "top" :
-                        _from       = "top";
-                        _position   = "-"+_height;        
-                    break;
-                    
-                    case "right" :
-                        _from       = "left";
-                        _position   = _width;      
-                    break;
-                    
-                    case "bottom" :
-                        _from       = "top";
-                        _position   = _height;    
-                    break;
-                    
-                    case "left" :
-                        _position   = "-"+_width;
-                    break;
-
-                   default :
-                        _from       = "left";
-                        _position   = "-"+_width;
-                    break;
-                }   
-            }
-
-            var wordIn = function(seconds, delay){
-                setWordAnimation();
-                _state[_from]       = 0+"px";
-                _state.opacity      = 1;
-
-                _styleLabel[_from]  = _position;
-                _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
-                _animation.play(seconds, delay);
+            var wordIn = function(seconds, delay){       
+                _animation.playIn(seconds, delay);
             }
 
             var wordOut = function(seconds, delay){
-                setWordAnimation();
-                _state[_from]   = _position;
-                _state.opacity  = 0;
-                _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
-                _animation.play(seconds, delay);
+                _animation.playOut(seconds, delay);
             }
         }
 

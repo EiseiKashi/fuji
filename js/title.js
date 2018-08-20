@@ -8,7 +8,7 @@ label.addEventListener(label.EVENT_IN_END, onLastFiniched);
 label.animationType = label.ANIMATION_LINEAR;
 label.playIn(1.2, delay+=2);
 */
-
+var counter = 0
 var fromList = ["top", "right", "bottom", "left"];
 function playIn(from, index){
     'stric mode'
@@ -16,8 +16,9 @@ function playIn(from, index){
     label.width        = "1000px";
     label.from         = from;
     label.formulaOut   = "outBack";
-    label.addEventListener(label.EVENT_IN_END, function(event){
-        label.playOut(1.2, delay+=2);
+    label.addEventListener(label.EVENT_IN_END, function eeeeeeeeeeeeeeeeeeeeee(event){
+        label.playOut(1, 3);
+        console.log("CLIENT!!!!");
     });
     label.playIn(1.2, delay+=2);
 }
@@ -27,8 +28,10 @@ var delay = 2;
 
 function moIchido(){
     for(var index=0; index < fromList.length; index++){
-        playIn(fromList[index]);
+        playIn(fromList[index], delay+=2);
      }
 }
 
-moIchido();
+//moIchido();
+
+playIn(fromList[1], delay+=2);

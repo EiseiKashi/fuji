@@ -340,8 +340,6 @@ function Yasashiku (){
                 }
             }
 
-            
-
             if(!_active){
                 _isLast = true;
                 _self.stop();
@@ -350,6 +348,7 @@ function Yasashiku (){
                 _isLast = false;
                 cancelAnimationFrame(_idTime);
             }else{
+                cancelAnimationFrame(_idTime);
                 _idTime = requestAnimationFrame(update);
                 emit(_self.EVENT_TICK);
             }
