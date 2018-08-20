@@ -1,10 +1,15 @@
 function Fuji (){
     'strict mode'
     var fontList = [
-        "'Rajdhani', sans-serif"
-       ,"'Rationale', sans-serif"
-       ,"'Share Tech', monospace"
+        "'Rajdhani',    sans-serif"
+       ,"'Rationale',   sans-serif"
+       ,"'Share Tech',  monospace"
     ]
+
+    var EVENT_IN_START  = "inStart";
+    var EVENT_IN_END    = "inEnd";
+    var EVENT_OUT_START = "inStart";
+    var EVENT_OUT_END   = "outEnd";
 
     var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
 
@@ -12,10 +17,10 @@ function Fuji (){
         this.ANIMATION_WORD    = "word";
         this.ANIMATION_RANDOM  = "random";
         this.ANIMATION_LINEAR  = "linear";
-        this.EVENT_IN_START    = "inStart";
-        this.EVENT_IN_END      = "inEnd";
-        this.EVENT_OUT_START   = "inStart";
-        this.EVENT_OUT_END     = "outEnd";
+        this.EVENT_IN_START    = EVENT_IN_START;
+        this.EVENT_IN_END      = EVENT_IN_END;
+        this.EVENT_OUT_START   = EVENT_OUT_START;
+        this.EVENT_OUT_END     = EVENT_OUT_END;
 
         var _self       = this;
         var _emitter    = new Emitter(this);
@@ -48,6 +53,8 @@ function Fuji (){
         this.formula        = _formula;
         this.formulaIn;
         this.formulaOut;
+        this.styleLabel;
+        this.styleContainer;
         
         _label                      = document.createElement("fuji-label");
         _styleLabel                 = _label.style; 
@@ -61,6 +68,9 @@ function Fuji (){
         _styleContainer.overflow    = "hidden";
 
         _container.appendChild(_label);
+
+        this.styleLabel             = _styleLabel;
+        this.styleContainer         = _styleContainer;
 
         _animation.add(_styleLabel, _state);
 
@@ -97,6 +107,14 @@ function Fuji (){
                     _height = _self.height;
                 }
             }
+
+            _self.formula = _self.formulaIn;
+            if(_self.formula != _formula){
+                _formula = _self.formula;
+            }
+
+            _animation.formula = _formula;
+            _from = _self.from;
             
             _label.innerHTML            = _text;
             _styleContainer.fontFamily  = _fontFamily;
@@ -171,22 +189,27 @@ function Fuji (){
                 _from = _self.from;
                 switch(_from){
                     case "top" :
-                    _position   = "-"+_height;        
+                        _from       = "top";
+                        _position   = "-"+_height;        
                     break;
                     
                     case "right" :
-                    _from       = " ";
-                    _position   = _width;      
+                        _from       = "left";
+                        _position   = _width;      
                     break;
                     
                     case "bottom" :
-                    _from       = "top";
-                    _position   = _height;    
+                        _from       = "top";
+                        _position   = _height;    
                     break;
                     
                     case "left" :
-                    default:
-                    _position   = "-"+_width;
+                        _position   = "-"+_width;
+                    break;
+
+                   default :
+                        _from       = "left";
+                        _position   = "-"+_width;
                     break;
                 }   
             }
@@ -234,6 +257,8 @@ function Fuji (){
                 if(charCounter == top){
                     clearInterval(_intervalId);
                     _label.innerHTML = _isOut ? "" : _text;
+                    var type = _isOut ? _self.EVENT_OUT_END : _self.EVENT_IN_END; 
+                    emit(type);
                 }
             }
 
@@ -254,10 +279,20 @@ function Fuji (){
 
                 if(charCounter == top){
                     clearInterval(_intervalId);
+                    var type
+                    if(_isOut){
+                        type = _self.EVENT_OUT_END;
+                        _label.innerHTML = "";
+                    }else{
+                        type = _self.EVENT_IN_END;
+                        _label.innerHTML = _text;
+                    } 
+                     emit(type);
                 }
             }
             
             var charIn = function(seconds, delay){
+                _isOut              = false;
                 _label.innerHTML    = "";
                 word                = new Array(_text.length).join(" ").split("");
                 _styleLabel.opacity = 1;
@@ -268,47 +303,48 @@ function Fuji (){
                     _element.appendChild(_container);    
                 }
 
-                top         = _text.length;
-                increment   = 1;
-                times       = 5;
-                counter     = 0;
-                charCounter = 0;
-
-                var method; 
-                
-                if(Label.ANIMATION_LINEAR){
-                    currentIndex    = 0;
-                    method = onOrderChar;
-                }
-                
-                if(Label.ANIMATION_RANDOM){
-                    randomIndex = [];
-                    for(var index=0; index<top; index++){
-                        randomIndex.push(index);
-                    }
-                    currentIndex = Math.floor(Math.random()*randomIndex.length);
-                    method = onRandomChar;
-                }
-
-                var interval    = (seconds/(top*times))*1000;
-                _intervalId     = setInterval(method, interval);
+                clearInterval(_intervalId);
+                _intervalId = setTimeout(animateChar, delay);
             }
 
             var charOut = function(seconds, delay){
-                 _isOut             = true;
+                _isOut             = true;
                 _styleLabel.opacity = 1;
                 _styleLabel.left    = 0;
                 _styleLabel.top     = 0;
 
-                top         = _text.length;
-                increment   = -1;
-                times       = 3;
-                index       = _text.length;
-                counter     = 0;
-                charCounter = 0;
-                var interval = (seconds/(top*times))*1000;
-                _intervalId = setInterval(onOrderChar, interval);
+                clearInterval(_intervalId);
+                _intervalId = setTimeout(animateChar, delay);
             }
+        }
+
+        var animateChar = function(method, interval){
+            top         = _text.length;
+            increment   = 1;
+            times       = 5;
+            counter     = 0;
+            charCounter = 0;
+
+            var method; 
+            
+            if(_self.ANIMATION_LINEAR == _self.animationType){
+                currentIndex    = 0;
+                method = onOrderChar;
+            }
+            
+            if(_self.ANIMATION_RANDOM == _self.animationType){
+                randomIndex = [];
+                for(var index=0; index<top; index++){
+                    randomIndex.push(index);
+                }
+                currentIndex = Math.floor(Math.random()*randomIndex.length);
+                method = onRandomChar;
+            }
+
+            var interval    = (seconds/(top*times))*1000;
+            
+            clearInterval(_intervalId);
+            _intervalId = setInterval(method, interval);
         }
 
         // Event emitter
