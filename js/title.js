@@ -21,17 +21,17 @@ function playIn(from, index){
         console.log("CLIENT!!!!");
     });
     label.playIn(1.2, delay+=2);
+    return label;
 }
 
 var fuji    = new Fuji();
 var delay = 2;
-
+var label;
 function moIchido(){
     for(var index=0; index < fromList.length; index++){
-        playIn(fromList[index], delay+=2);
+        label = playIn(fromList[index], delay);
+        delay ++;
      }
 }
 
-//moIchido();
-
-playIn(fromList[1], delay+=2);
+moIchido();

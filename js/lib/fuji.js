@@ -22,20 +22,21 @@ function Fuji (){
         this.EVENT_OUT_START   = EVENT_OUT_START;
         this.EVENT_OUT_END     = EVENT_OUT_END;
 
-        var _self       = this;
-        var _emitter    = new Emitter(this);
-        var _text       = text == null ? "Label" : text;
-        var _fontFamily = fontList[2];
-        var _fontSize   = "36px";
-        var _width      = "100px";
-        var _height     = (parseFloat(_fontSize)*2)+"px";
-        var _from       = "left";
-        var _position   = "-"+_width;
-        var _formula    = "outBack";
-        var _element    = document.body;
-        var _yasashiku  = new Yasashiku();
-        var _animation;
-        var _state      = {};
+        var _self           = this;
+        var _emitter        = new Emitter(this);
+        var _text           = text == null ? "Label" : text;
+        var _fontFamily     = fontList[2];
+        var _fontSize       = "36px";
+        var _width          = "100px";
+        var _height         = (parseFloat(_fontSize)*2)+"px";
+        var _from           = "left";
+        var _position       = "-"+_width;
+        var _formula        = "outBack";
+        var _element        = document.body;
+        var _yasashiku      = new Yasashiku();
+        var _animatorList   = {}
+        var _state          = {};
+        var _animator;
         var _isOut;
 
         var _label;
@@ -74,12 +75,6 @@ function Fuji (){
         this.styleContainer         = _styleContainer;
 
         _yasashiku.add(_styleLabel, _state);
-
-        _animation = new WordAnimation(this, _yasashiku, _state);
-        _animation.onComplete = function(type){
-            console.log("FUJI ", type);
-            emit(type);
-        };
 
         this.appendTo = function (element){
             if(null != element && element != _element && typeof element.appendChild == "function"){
@@ -142,7 +137,15 @@ function Fuji (){
             
             switch(this.animationType){
                 case _self.ANIMATION_WORD :
-                    doPlay = wordIn; 
+                    if(null != _animator){
+                        _animator.stop();
+                    }
+                    if(null == _animatorList[_self.ANIMATION_WORD]){
+                        _animatorList[_self.ANIMATION_WORD] = new WordAnimation(this, _yasashiku, _state);
+                    }
+                    _animator =  _animatorList[_self.ANIMATION_WORD];
+                    _animator.onComplete = onAnimationComplete;
+                    _animator.playIn(seconds, delay);
                     break;
                 case _self.ANIMATION_LINEAR :
                 case _self.ANIMATION_RANDOM :
@@ -151,8 +154,6 @@ function Fuji (){
                 default: 
                     doPlay = wordIn; 
             }
-            emit(_self.EVENT_IN_START);
-            doPlay.apply(this, [seconds, delay]);
         }
 
         this.playOut = function(seconds, delay){
@@ -179,12 +180,14 @@ function Fuji (){
 
         // WORD ANIMATION
         {
-            var wordIn = function(seconds, delay){       
-                _animation.playIn(seconds, delay);
+            var wordIn = function(seconds, delay){
+                emit(_self.EVENT_IN_START); 
+                _animator.playIn(seconds, delay);
             }
 
             var wordOut = function(seconds, delay){
-                _animation.playOut(seconds, delay);
+                emit(_self.EVENT_OUT_START);
+                _animator.playOut(seconds, delay);
             }
         }
 
@@ -309,6 +312,10 @@ function Fuji (){
 
         this.removeEventListener = function(type, listener, context){
             _emitter.removeEventListener(type, listener, context);
+        }
+
+        function onAnimationComplete (type){
+            emit(type);
         }
 
         var emit = function(type){
