@@ -1,13 +1,14 @@
-/*
-var label0              = fuji.createLabel("Ayumi Kotegawa");
-    label0.width        = "100px";
-    label0.from         = "left";
-    label0.formulaOut   = "outBack";
-var label = label0;
-label.addEventListener(label.EVENT_IN_END, onLastFiniched);
-label.animationType = label.ANIMATION_LINEAR;
-label.playIn(1.2, delay+=2);
-*/
+var fuji    = new Fuji();
+
+var label              = fuji.createLabel("Ayumi Kotegawa");
+    label.width        = "1000px";
+    label.from         = "left";
+    label.formulaOut   = "outBack";
+
+    //label.addEventListener(label.EVENT_IN_END, onLastFiniched);
+    label.animationType = label.ANIMATION_LINEAR;
+    label.playIn(5, 2);
+
 var counter = 0
 var fromList = ["top", "right", "bottom", "left"];
 function playIn(from, index){
@@ -24,7 +25,6 @@ function playIn(from, index){
     return label;
 }
 
-var fuji    = new Fuji();
 var delay = 2;
 var label;
 function moIchido(){
@@ -34,4 +34,4 @@ function moIchido(){
      }
 }
 
-moIchido();
+//moIchido();
