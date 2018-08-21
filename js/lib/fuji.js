@@ -87,7 +87,7 @@ function Fuji (){
     }
 
     // CHAR ANIMATION
-    var CharAnimation = function(label) {
+    var CharAnimation = function(label, element) {
         'strict mode'
         var _self       = this;
         var _styleLabel = label.styleLabel;
@@ -112,13 +112,14 @@ function Fuji (){
         this.playIn = function(seconds, delay){
             console.log("playIn");
             _isOut              = false;
-            label.innerHTML     = "";
+            element.innerHTML   = "";
+            console.log(label)
             _letterList         = new Array(_self.text.length).join(" ").split("");
             _styleLabel.opacity = 1;
             _styleLabel.left    = 0;
             _styleLabel.top     = 0;
             _seconds            = seconds*1000;
-
+            
             clearInterval(_intervalId);
             _intervalId = setTimeout(animateChar, delay*1000);
         }
@@ -179,11 +180,11 @@ function Fuji (){
             }else{
                 _letterList[_currentIndex] = char;
             }
-            label.innerHTML = _letterList.join("");
+            element.innerHTML = _letterList.join("");
 
             if(_charCounter == _top){
                 clearInterval(_intervalId);
-                label.innerHTML = _isOut ? "" : _self.text;
+                element.innerHTML = _isOut ? "" : _self.text;
                 var type = _isOut ? _self.EVENT_OUT_END : _self.EVENT_IN_END; 
                 onAnimationComplete();
             }
@@ -203,17 +204,17 @@ function Fuji (){
             }else{
                 _letterList[_charIndex] = char;
             }
-            label.innerHTML = _letterList.join("");
+            element.innerHTML = _letterList.join("");
 
             if(_charCounter == _top){
                 clearInterval(_intervalId);
                 var type
                 if(_isOut){
-                    type            = _self.EVENT_OUT_END;
-                    label.innerHTML = "";
+                    type                = _self.EVENT_OUT_END;
+                    element.innerHTML   = "";
                 }else{
                     type                = _self.EVENT_IN_END;
-                    label.innerHTML    = _self.text;
+                    element.innerHTML   = _self.text;
                 } 
 
                 onAnimationComplete();
@@ -367,7 +368,7 @@ function Fuji (){
                 case _self.ANIMATION_LINEAR :
                 case _self.ANIMATION_RANDOM :
                     if(null == _animatorList[_self.ANIMATION_CHAR]){
-                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self);
+                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label);
                     }
                     _animator               =  _animatorList[_self.ANIMATION_CHAR];
                     _animator.animationType = _self.animationType
