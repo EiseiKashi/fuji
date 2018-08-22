@@ -1,4 +1,4 @@
-var fuji    = new Fuji();
+var fuji = new Fuji();
 
 function onEndComplete(event){
     event.target.playOut(3, 2);
@@ -13,17 +13,18 @@ var label              = fuji.createLabel("Ayumi Kotegawa");
     label.animationType = label.ANIMATION_RANDOM;
     label.playIn(5, 2);
 
-var counter = 0
-var fromList = ["top", "right", "bottom", "left"];
+var counter     = 0
+var fromList    = ["top", "right", "bottom", "left"];
+
 function playIn(from, index){
     'stric mode'
-    var label = fuji.createLabel("Ayumi Kotegawa 愛してるよ！");
-    label.width        = "1000px";
-    label.from         = from;
-    label.formulaOut   = "outBack";
-    label.addEventListener(label.EVENT_IN_END, function eeeeeeeeeeeeeeeeeeeeee(event){
+    var label               = fuji.createLabel("Ayumi Kotegawa 愛してるよ！");
+        label.width         = "1000px";
+        label.from          = from;
+        label.formulaOut    = "outBack";
+
+        label.addEventListener(label.EVENT_IN_END, function(event){
         label.playOut(1, 3);
-        console.log("CLIENT!!!!");
     });
     label.playIn(1.2, delay+=2);
     return label;

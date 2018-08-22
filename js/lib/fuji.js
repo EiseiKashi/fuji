@@ -230,10 +230,11 @@ function Fuji (){
     }
 
     function Label (text){
-        this.ANIMATION_WORD    = "word";
-        this.ANIMATION_RANDOM  = "random";
-        this.ANIMATION_LINEAR  = "linear";
-        this.ANIMATION_CHAR    = "char";
+        this.ANIMATION_WORD    = "wordAnimation";
+        this.ANIMATION_RANDOM  = "randomAnimation";
+        this.ANIMATION_LINEAR  = "linearAnimation";
+        this.ANIMATION_SPAN    = "spanAnimation"
+        this.ANIMATION_CHAR    = "charAnimation";
         this.EVENT_IN_START    = EVENT_IN_START;
         this.EVENT_IN_END      = EVENT_IN_END;
         this.EVENT_OUT_START   = EVENT_OUT_START;
@@ -297,7 +298,18 @@ function Fuji (){
             }
         }
 
-        function setPlay(){
+        this.playIn = function(seconds, delay){
+            _isOut = false;
+            play(seconds, delay);
+        }
+
+        this.playOut = function(seconds, delay){
+            _isOut = true;
+            play(seconds, delay);
+        }
+
+        function play (seconds, delay){
+            
             if(_self.text != _text){
                 _text = _self.text;
             }
@@ -340,52 +352,15 @@ function Fuji (){
             if(!_element.contains(_container)){
                 _element.appendChild(_container);    
             }
-        }
 
-        this.playIn = function(seconds, delay){
-            _isOut = false;
-            
-            setPlay();
-
-            emit(_self.EVENT_IN_START);
+            var typeToEmit = _isOut ? _self.EVENT_OUT_START : _self.EVENT_IN_START;
+            emit(typeToEmit);
 
             if(null != _animator){
                 _animator.stop();
             }
 
-            switch(_self.animationType){
-                case _self.ANIMATION_WORD :
-                    if(null == _animatorList[_self.ANIMATION_WORD]){
-                        _animatorList[_self.ANIMATION_WORD] = new WordAnimation(_self, _yasashiku, _state);
-                    }
-                    _animator =  _animatorList[_self.ANIMATION_WORD];
-                    _animator.onComplete = onAnimationComplete;
-                    _animator.playIn(seconds, delay);
-                    break;
-                case _self.ANIMATION_LINEAR :
-                case _self.ANIMATION_RANDOM :
-                    if(null == _animatorList[_self.ANIMATION_CHAR]){
-                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label);
-                    }
-                    _animator               =  _animatorList[_self.ANIMATION_CHAR];
-                    _animator.animationType = _self.animationType
-                    _animator.text          = _text;
-                    _animator.onComplete    = onAnimationComplete;
-                    _animator.playIn(seconds, delay); 
-                    break;
-            }
-        }
-
-        this.playOut = function(seconds, delay){
-            _isOut = true;
-            
-            setPlay();
-
-            emit(_self.EVENT_OUT_START);
-
-            if(null != _animator){
-                _animator.stop();
-            }
+            _animator = null;
             
             switch(_self.animationType){
                 case _self.ANIMATION_WORD :
@@ -397,7 +372,6 @@ function Fuji (){
                     }
                     _animator =  _animatorList[_self.ANIMATION_WORD];
                     _animator.onComplete = onAnimationComplete;
-                    _animator.playOut(seconds, delay);
                     break;
                 case _self.ANIMATION_LINEAR :
                 case _self.ANIMATION_RANDOM :
@@ -408,8 +382,22 @@ function Fuji (){
                     _animator.animationType = _self.animationType
                     _animator.text          = _text;
                     _animator.onComplete    = onAnimationComplete;
-                    _animator.playOut(seconds, delay); 
                     break;
+                case _self.ANIMATION_SPAN :
+                    if(null == _animatorList[_self.ANIMATION_SPAN]){
+                        _animatorList[_self.ANIMATION_SPAN] = new SpanAnimation(_self, _yasashiku);
+                    }
+                    _animator =  _animatorList[_self.ANIMATION_SPAN];
+                    _animator.onComplete = onAnimationComplete;
+                    break;
+            }
+
+            if(null != _animator){
+                if(_isOut){
+                    _animator.playOut(seconds, delay);
+                }else{
+                    _animator.playIn(seconds, delay);
+                }
             }
         }
 
