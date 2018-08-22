@@ -11,7 +11,7 @@ var label              = fuji.createLabel("Ayumi Kotegawa");
 
     label.addEventListener(label.EVENT_IN_END, onEndComplete);
     label.animationType = label.ANIMATION_SPAN;
-    label.playIn(5, 2);
+    label.playIn(3, 2);
 
 var counter     = 0
 var fromList    = ["top", "right", "bottom", "left"];

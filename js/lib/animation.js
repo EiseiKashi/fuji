@@ -57,7 +57,7 @@ var SpanAnimation = function(label, element) {
             var span                = document.createElement("char-fuji");
                 span.style.display  = "inline-block";
                 span.style.position = "relative";
-            var char = _isOut ? _self.text.charAt(index) : " . "
+            var char = _isOut ? _self.text.charAt(index) : " "
             _spanList.push(span);
             element.appendChild(span);
             span.innerHTML = char;
@@ -68,25 +68,28 @@ var SpanAnimation = function(label, element) {
             _randomIndex.push(index);
         }
 
-        _currentIndex = Math.floor(Math.random()*_randomIndex.length);
+        _currentIndex   = Math.floor(Math.random()*_randomIndex.length);
+        _charIndex      = _randomIndex[_currentIndex];
         clearInterval(_intervalId);
-        _intervalId = setInterval(onRandomChar, 20);
+        _intervalId = setInterval(onRandomChar, 45);
     }
 
     function onRandomChar(isFirst){
-        var char    = LETTERS[Math.floor(Math.random()*LETTERS.length)];
-        _charIndex  =  Math.floor(Math.random()* _self.text.length)
+        var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
         if(++_counter%_times == 0){
-            _currentIndex   = Math.floor(Math.random()*_randomIndex.length);
-            _charIndex      = _randomIndex[_currentIndex];
-            char            = _isOut ? " . " : _self.text.charAt(_charIndex);
+            _charIndex = _randomIndex[_currentIndex];
+            _spanList[_charIndex].innerHTML = _isOut ? "" : _self.text.charAt(_charIndex);
             _randomIndex.splice(_currentIndex, 1);
+            _currentIndex = Math.floor(Math.random()*_randomIndex.length);
+            _charIndex = _randomIndex[_currentIndex];
             _charCounter ++;
+        }else{
+            if(_spanList[_charIndex]== null)
+            {
+                debugger;
+            }
+            _spanList[_charIndex].innerHTML = char;
         }
-        if(null == _spanList[_charIndex]){
-            debugger;
-        }
-        _spanList[_charIndex].innerHTML = char;
 
         if(_charCounter == _top){
             clearInterval(_intervalId);
@@ -96,7 +99,7 @@ var SpanAnimation = function(label, element) {
                 //element.innerHTML   = "";
             }else{
                 type                = _self.EVENT_IN_END;
-                element.innerHTML   = _self.text;
+                //element.innerHTML   = _self.text;
             }
             onAnimationComplete();
         }
