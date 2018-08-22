@@ -57,7 +57,9 @@ var SpanAnimation = function(label, element) {
             var span                = document.createElement("char-fuji");
                 span.style.display  = "inline-block";
                 span.style.position = "relative";
-            var char = _isOut ? _self.text.charAt(index) : LETTERS[Math.floor(Math.random()*LETTERS.length)];
+                span.style.transition = "all " + .2 +  "s";
+                span.style.opacity = _isOut ? 1 : 0;
+            var char = _self.text.charAt(index);
             _spanList.push(span);
             element.appendChild(span);
             span.innerHTML = char;
@@ -71,14 +73,15 @@ var SpanAnimation = function(label, element) {
         _currentIndex   = Math.floor(Math.random()*_randomIndex.length);
         _charIndex      = _randomIndex[_currentIndex];
         clearInterval(_intervalId);
-        _intervalId = setInterval(onRandomChar, 15);
+        onRandomChar();
     }
 
     function onRandomChar(isFirst){
         var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
-        if(++_counter%_times == 0){
+        if(++_counter%_times == 0 ){
             _charIndex = _randomIndex[_currentIndex];
-            _spanList[_charIndex].innerHTML = _isOut ? "" : _self.text.charAt(_charIndex);
+            _spanList[_charIndex].innerHTML = _isOut ? char : _self.text.charAt(_charIndex);
+            _spanList[_charIndex].style.opacity = _isOut ? 0 : 1;
             _randomIndex.splice(_currentIndex, 1);
             _currentIndex = Math.floor(Math.random()*_randomIndex.length);
             _charIndex = _randomIndex[_currentIndex];
@@ -88,9 +91,10 @@ var SpanAnimation = function(label, element) {
             {
                 debugger;
             }
-            _spanList[_charIndex].innerHTML = char;
+            _spanList[_charIndex].innerHTML =  _self.text.charAt(_charIndex) != " " ? char : " ";
+            _spanList[_charIndex].style.opacity = 1;
         }
-
+        
         if(_charCounter == _top){
             clearInterval(_intervalId);
             var type
@@ -102,6 +106,9 @@ var SpanAnimation = function(label, element) {
                 //element.innerHTML   = _self.text;
             }
             onAnimationComplete();
+        }else{
+            clearInterval(_intervalId);
+            _intervalId = setTimeout(onRandomChar,20);
         }
     }
 

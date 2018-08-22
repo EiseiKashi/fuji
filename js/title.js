@@ -4,14 +4,14 @@ function onEndComplete(event){
     event.target.playOut(3, 5);
 }
 
-var label              = fuji.createLabel("Ayumi Kotegawa");
+var label              = fuji.createLabel("BLOCKCHAIN TECHNOLOGY");
     label.width        = "1000px";
     label.from         = "left";
     label.formulaOut   = "outBack";
 
     label.addEventListener(label.EVENT_IN_END, onEndComplete);
-    label.animationType = label.ANIMATION_SPAN;
-    label.playIn(3, 2);
+    label.animationType = label.ANIMATION_RANDOM;
+    label.playIn(3);
 
 var counter     = 0
 var fromList    = ["top", "right", "bottom", "left"];
