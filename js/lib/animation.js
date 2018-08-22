@@ -57,7 +57,7 @@ var SpanAnimation = function(label, element) {
             var span                = document.createElement("char-fuji");
                 span.style.display  = "inline-block";
                 span.style.position = "relative";
-            var char = _isOut ? _self.text.charAt(index) : " "
+            var char = _isOut ? _self.text.charAt(index) : LETTERS[Math.floor(Math.random()*LETTERS.length)];
             _spanList.push(span);
             element.appendChild(span);
             span.innerHTML = char;
@@ -71,7 +71,7 @@ var SpanAnimation = function(label, element) {
         _currentIndex   = Math.floor(Math.random()*_randomIndex.length);
         _charIndex      = _randomIndex[_currentIndex];
         clearInterval(_intervalId);
-        _intervalId = setInterval(onRandomChar, 45);
+        _intervalId = setInterval(onRandomChar, 15);
     }
 
     function onRandomChar(isFirst){
