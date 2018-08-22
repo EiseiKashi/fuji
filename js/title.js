@@ -1,7 +1,7 @@
 var fuji = new Fuji();
 
 function onEndComplete(event){
-    event.target.playOut(3, 2);
+    event.target.playOut(3, 5);
 }
 
 var label              = fuji.createLabel("Ayumi Kotegawa");
@@ -10,7 +10,7 @@ var label              = fuji.createLabel("Ayumi Kotegawa");
     label.formulaOut   = "outBack";
 
     label.addEventListener(label.EVENT_IN_END, onEndComplete);
-    label.animationType = label.ANIMATION_RANDOM;
+    label.animationType = label.ANIMATION_SPAN;
     label.playIn(5, 2);
 
 var counter     = 0

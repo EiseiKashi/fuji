@@ -248,7 +248,6 @@ function Fuji (){
         var _width          = "100px";
         var _height         = (parseFloat(_fontSize)*2)+"px";
         var _from           = "left";
-        var _position       = "-"+_width;
         var _formula        = "outBack";
         var _element        = document.body;
         var _yasashiku      = new Yasashiku();
@@ -363,6 +362,7 @@ function Fuji (){
             _animator = null;
             
             switch(_self.animationType){
+                //////////////////////////////
                 case _self.ANIMATION_WORD :
                     if(null != _animator){
                         _animator.stop();
@@ -370,9 +370,10 @@ function Fuji (){
                     if(null == _animatorList[_self.ANIMATION_WORD]){
                         _animatorList[_self.ANIMATION_WORD] = new WordAnimation(_self, _yasashiku, _state);
                     }
-                    _animator =  _animatorList[_self.ANIMATION_WORD];
-                    _animator.onComplete = onAnimationComplete;
+                    _animator               =  _animatorList[_self.ANIMATION_WORD];
+                    _animator.onComplete    = onAnimationComplete;
                     break;
+                //////////////////////////////
                 case _self.ANIMATION_LINEAR :
                 case _self.ANIMATION_RANDOM :
                     if(null == _animatorList[_self.ANIMATION_CHAR]){
@@ -383,13 +384,16 @@ function Fuji (){
                     _animator.text          = _text;
                     _animator.onComplete    = onAnimationComplete;
                     break;
+                //////////////////////////////
                 case _self.ANIMATION_SPAN :
                     if(null == _animatorList[_self.ANIMATION_SPAN]){
-                        _animatorList[_self.ANIMATION_SPAN] = new SpanAnimation(_self, _yasashiku);
+                        _animatorList[_self.ANIMATION_SPAN] = new SpanAnimation(_self, _label);
                     }
-                    _animator =  _animatorList[_self.ANIMATION_SPAN];
-                    _animator.onComplete = onAnimationComplete;
+                    _animator               =  _animatorList[_self.ANIMATION_SPAN];
+                    _animator.text          = _text;
+                    _animator.onComplete    = onAnimationComplete;
                     break;
+                //////////////////////////////
             }
 
             if(null != _animator){

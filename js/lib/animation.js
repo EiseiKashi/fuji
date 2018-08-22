@@ -13,7 +13,6 @@ var SpanAnimation = function(label, element) {
     var _top;
     var _charCounter;
     var _randomIndex;
-    var _letterList;
     var _spanList;
     var _intervalId;
 
@@ -23,7 +22,6 @@ var SpanAnimation = function(label, element) {
     this.playIn = function(seconds, delay){
         _isOut              = false;
         element.innerHTML   = "";
-        _letterList         = new Array(_self.text.length).join(" ").split("");
         _styleLabel.opacity = 1;
         _styleLabel.left    = 0;
         _styleLabel.top     = 0;
@@ -36,14 +34,13 @@ var SpanAnimation = function(label, element) {
 
     this.playOut = function(seconds, delay){
         _isOut              = true;
-        _styleLabel.opacity = 1;
-        _styleLabel.left    = 0;
-        _styleLabel.top     = 0;
-        _top                = _self.text.length;
-        _currentIndex       = _self.text.length-1;
-
-        clearInterval(_intervalId);
-        _intervalId = setTimeout(animateChar, delay*1000);
+            _styleLabel.opacity = 1;
+            _styleLabel.left    = 0;
+            _styleLabel.top     = 0;
+            _top                = _self.text.length;
+            _currentIndex       = 0;
+            clearInterval(_intervalId);
+            _intervalId = setTimeout(animateChar, delay*1000);
     }
 
     this.stop = function(){
@@ -51,48 +48,52 @@ var SpanAnimation = function(label, element) {
     }
 
     function animateChar(){
-        _times       = 5;
-        _counter     = 0;
-        _charCounter = 0;
-
-        _randomIndex = [];
-        _spanList    = [];
-
+        _times              = 5;
+        _counter            = 0;
+        _charCounter        = 0;
+        element.innerHTML   = ""
+        _spanList           = [];
         for(var index=0; index<_top; index++){
-            _randomIndex.push(index);
             var span                = document.createElement("char-fuji");
                 span.style.display  = "inline-block";
                 span.style.position = "relative";
+            var char = _isOut ? _self.text.charAt(index) : " . "
             _spanList.push(span);
+            element.appendChild(span);
+            span.innerHTML = char;
         }
 
-        _currentIndexv= Math.floor(Math.random()*_randomIndex.length);
+        _randomIndex = [];
+        for(var index=0; index<_top; index++){
+            _randomIndex.push(index);
+        }
+
+        _currentIndex = Math.floor(Math.random()*_randomIndex.length);
         clearInterval(_intervalId);
         _intervalId = setInterval(onRandomChar, 20);
     }
 
     function onRandomChar(isFirst){
-        var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
-
+        var char    = LETTERS[Math.floor(Math.random()*LETTERS.length)];
+        _charIndex  =  Math.floor(Math.random()* _self.text.length)
         if(++_counter%_times == 0){
-            _charIndex = _randomIndex[_currentIndex];
-            _letterList[_charIndex] = _isOut ? "" : _self.text.charAt(_charIndex);
+            _currentIndex   = Math.floor(Math.random()*_randomIndex.length);
+            _charIndex      = _randomIndex[_currentIndex];
+            char            = _isOut ? " . " : _self.text.charAt(_charIndex);
             _randomIndex.splice(_currentIndex, 1);
-            _currentIndex = Math.floor(Math.random()*_randomIndex.length);
-            _charIndex = _randomIndex[_currentIndex];
             _charCounter ++;
-        }else{
-            _letterList[_charIndex] = char;
         }
-
-        element.innerHTML = _letterList.join("");
+        if(null == _spanList[_charIndex]){
+            debugger;
+        }
+        _spanList[_charIndex].innerHTML = char;
 
         if(_charCounter == _top){
             clearInterval(_intervalId);
             var type
             if(_isOut){
                 type                = _self.EVENT_OUT_END;
-                element.innerHTML   = "";
+                //element.innerHTML   = "";
             }else{
                 type                = _self.EVENT_IN_END;
                 element.innerHTML   = _self.text;
@@ -109,3 +110,5 @@ var SpanAnimation = function(label, element) {
     this.onComplete = function (type){
     }
 }
+
+var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
