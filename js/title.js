@@ -1,12 +1,16 @@
 var fuji    = new Fuji();
 
+function onEndComplete(event){
+    event.target.playOut(3, 2);
+}
+
 var label              = fuji.createLabel("Ayumi Kotegawa");
     label.width        = "1000px";
     label.from         = "left";
     label.formulaOut   = "outBack";
 
-    //label.addEventListener(label.EVENT_IN_END, onLastFiniched);
-    label.animationType = label.ANIMATION_LINEAR;
+    label.addEventListener(label.EVENT_IN_END, onEndComplete);
+    label.animationType = label.ANIMATION_RANDOM;
     label.playIn(5, 2);
 
 var counter = 0

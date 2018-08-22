@@ -81,7 +81,6 @@ function Fuji (){
 
         function onAnimationComplete(){
             var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
-            console.log(type, " ANIMATION COMPLETE");
             _self.onComplete(type);
         }
     }
@@ -110,28 +109,32 @@ function Fuji (){
         this.animationType;
 
         this.playIn = function(seconds, delay){
-            console.log("playIn");
             _isOut              = false;
             element.innerHTML   = "";
-            console.log(label)
             _letterList         = new Array(_self.text.length).join(" ").split("");
             _styleLabel.opacity = 1;
             _styleLabel.left    = 0;
             _styleLabel.top     = 0;
             _seconds            = seconds*1000;
             
+            _top                = _self.text.length;
+            _increment          = 1;
+            _currentIndex       = 0;
+
             clearInterval(_intervalId);
             _intervalId = setTimeout(animateChar, delay*1000);
         }
 
         this.playOut = function(seconds, delay){
-            console.log("playOut");
             _isOut              = true;
             _styleLabel.opacity = 1;
             _styleLabel.left    = 0;
             _styleLabel.top     = 0;
             _seconds            = seconds*1000;
 
+            _top                = label.ANIMATION_RANDOM == _self.animationType ? _self.text.length : -1;
+            _increment          = -1;
+            _currentIndex       = _self.text.length-1;
             clearInterval(_intervalId);
             _intervalId = setTimeout(animateChar, delay*1000);
         }
@@ -140,10 +143,8 @@ function Fuji (){
             clearInterval(_intervalId);
         }
 
-        var animateChar = function(){
-            console.log("animateChar");
-            _top         = _self.text.length;
-            _increment   = 1;
+        function animateChar(){
+            
             _times       = 5;
             _counter     = 0;
             _charCounter = 0;
@@ -151,7 +152,7 @@ function Fuji (){
             var method; 
             
             if(label.ANIMATION_LINEAR == _self.animationType){
-                _currentIndex    = 0;
+                
                 method = onOrderChar;
             }
             
@@ -170,8 +171,7 @@ function Fuji (){
             _intervalId = setInterval(method, 20);
         }
 
-        var onOrderChar = function(isFirst){
-            console.log("onOrderChar");
+        function onOrderChar(isFirst){
             var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
             if(++_counter%_times == 0){
                 _letterList[_currentIndex] = _isOut ? "" : _self.text.charAt(_currentIndex);
@@ -190,8 +190,7 @@ function Fuji (){
             }
         }
 
-        var onRandomChar = function(isFirst){
-            console.log("onRandomChar");
+        function onRandomChar(isFirst){
             var char = LETTERS[Math.floor(Math.random()*LETTERS.length)];
             if(++_counter%_times == 0){
                 
@@ -222,9 +221,7 @@ function Fuji (){
         }
 
         function onAnimationComplete(){
-            console.log("onAnimationComplete");
             var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
-            console.log(type, " ANIMATION COMPLETE");
             _self.onComplete(type);
         }
 
@@ -300,7 +297,7 @@ function Fuji (){
             }
         }
 
-        var setPlay = function(){
+        function setPlay(){
             if(_self.text != _text){
                 _text = _self.text;
             }
@@ -385,6 +382,10 @@ function Fuji (){
             setPlay();
 
             emit(_self.EVENT_OUT_START);
+
+            if(null != _animator){
+                _animator.stop();
+            }
             
             switch(_self.animationType){
                 case _self.ANIMATION_WORD :
@@ -400,10 +401,15 @@ function Fuji (){
                     break;
                 case _self.ANIMATION_LINEAR :
                 case _self.ANIMATION_RANDOM :
-                    doPlay = charOut; 
+                    if(null == _animatorList[_self.ANIMATION_CHAR]){
+                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label);
+                    }
+                    _animator               =  _animatorList[_self.ANIMATION_CHAR];
+                    _animator.animationType = _self.animationType
+                    _animator.text          = _text;
+                    _animator.onComplete    = onAnimationComplete;
+                    _animator.playOut(seconds, delay); 
                     break;
-                default: 
-                    doPlay = wordOut; 
             }
         }
 
@@ -420,7 +426,7 @@ function Fuji (){
             emit(type);
         }
 
-        var emit = function(type){
+        function emit(type){
             _emitter.emit(type)
         }
     }
