@@ -1,19 +1,19 @@
 var fuji = new Fuji();
 
 function onEndComplete(event){
-    event.target.playOut(3, 5);
+    event.target.playOut(.7, 5);
 }
 
-var label              = fuji.createLabel("BLOCKCHAIN TECHNOLOGY");
+var label              = fuji.createLabel("Ayumi Kotegawa Chain");
     label.width        = "1000px";
     label.from         = "left";
     label.formulaOut   = "outBack";
 
     label.addEventListener(label.EVENT_IN_END, onEndComplete);
     label.animationType = label.ANIMATION_RANDOM;
-    label.playIn(3);
+    label.playIn(.7);
 
-var counter     = 0
+var counter     = 0;
 var fromList    = ["top", "right", "bottom", "left"];
 
 function playIn(from, index){
