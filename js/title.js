@@ -4,7 +4,7 @@ function onEndComplete(event){
     event.target.playOut(.7, 5);
 }
 
-var label              = fuji.createLabel("Ayumi Kotegawa Chain");
+var label              = fuji.createLabel("Ayumi Kotegawa");
     label.width        = "1000px";
     label.from         = "left";
     label.formulaOut   = "outBack";
