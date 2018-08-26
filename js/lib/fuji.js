@@ -11,9 +11,9 @@ function Fuji (){
     var EVENT_OUT_START = "outStart";
     var EVENT_OUT_END   = "outEnd";
 
-    var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
     // ANIMATIONS
     {
+        var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
         // STYLE ANIMATION
         var WordAnimation = function(label, animation, state) {
             'strict mode'
@@ -87,178 +87,49 @@ function Fuji (){
         }
 
         // SPAN RANDOM
-        var SpanRandom = function(label, element) {
+        var CharAnimation = function(label, element, animation) {
             'strict mode'
 
-            function SpanData(char){
-                var span                    = document.createElement("span");
-                    span.style.opacity      = 0;
-                    span.innerHTML          = char;
-                this.span                   = span;
-            
-                var _intervalId;
+            function SpanData(char, isSpinner){
+                var span                = document.createElement("span");
+                    span.style.opacity  = 0;
+                    span.innerHTML      = char;
+                this.span               = span;
                 
-                this.animate = function(milliseconds, delay){
-                    span.style.transition   = "all " + milliseconds +  "ms";
-                    var charCounter         = 0;
-                    var top                 = Math.floor(Math.random()*20)+3;
-            
-                    function change(){
-                        span.style.opacity = _isOut ? 0 : 1;
-                        if(charCounter < top){
-                            span.innerHTML = LETTERS[Math.floor(LETTERS.length*Math.random())];
-                            charCounter++;
+                var _isSpinner          = isSpinner;
+                var _intervalId;
+                var _charCounter        = 0;
+                var _top                = 0;
+                
+                function change(){
+                    span.style.opacity = _isOut ? 0 : 1;
+                    if(_charCounter < _top){
+                        var charTmp = char; 
+                        if(_isSpinner){
+                            charTmp = LETTERS[Math.floor(LETTERS.length*Math.random())];
                         }else{
-                            clearInterval(_intervalId);
-                            span.innerHTML = _isOut ? char : "";
+                            charTmp =  char;
                         }
-                    }
-                    clearInterval(_intervalId);
-                    setTimeout(function(){
-                        change();
+                        span.innerHTML = charTmp; 
+                        _charCounter++;
+                    }else{
                         clearInterval(_intervalId);
-                        _intervalId = setInterval(change, milliseconds/top);
-                    }, delay);
+                        span.innerHTML = _isOut ? "" : char;
+                    }
                 }
 
-                this.stop = function(){
+                this.animate = function(milliseconds, delay, isSpinner){
                     clearInterval(_intervalId);
-                    span.innerHTML = char;
-                }
-            }
+                    _isSpinner              = isSpinner;
+                    span.style.transition   = "all " + milliseconds + "ms";
 
-            var _self       = this;
-            var _isOut;
-            var _milliseconds;
-            var _spanList;
-            var _intervalId;
-            var _text;
-            var _textLength;
-
-            function setAnimation(){
-                var char;
-                var span;
-                _text               = label.text;
-                _textLength         = _text.length;
-                element.innerHTML   = "";
-                orderList           = [];
-                _spanList           = [];
-                for(var index = 0; index < _textLength; index++ ){
-                    char = _text.charAt(index);
-                    span = new SpanData(char);
-                    _spanList.push(span);
+                    _charCounter    = 0;
+                    _top            = Math.floor(Math.random()*20)+3;
                     
-                    element.appendChild(span.span);
-                    orderList.push(index);
-                }
-
-                var randomIndex;
-                unOrderList = orderList;
-                for(var index=0; index < _textLength; index++ ){
-                    randomIndex = Math.floor(orderList.length*Math.random());
-                    unOrderList.push(orderList[randomIndex]);
-                    orderList.splice(randomIndex, 1);
-                }
-
-                animate();
-            }
-
-            function animate(){
-                var fracc = _milliseconds / _textLength;
-                var delay = 0; 
-                for(index=0; index < _textLength; index++){
-                var span = _spanList[unOrderList[index]];
-                    span.animate(_milliseconds-delay, delay);
-                    delay += fracc;
-                }
-
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(onAnimationComplete, _milliseconds);
-            }
-
-            this.playIn = function(seconds, delay){
-                _self.stop();
-                _isOut          = false;
-                _milliseconds   = seconds*1000;
-                delay           = isNumber(delay) ? delay : 0;
-
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(setAnimation, delay*1000);
-            }
-
-            this.playOut = function(seconds, delay){
-                if(null == _spanList){
-                    return;
-                }
-                this.stop();
-                _isOut          = true;
-                _milliseconds   = seconds*1000;
-                delay           = isNumber(delay) ? delay : 0;
-                element.innerHTML = "";
-                var length = _spanList.length;
-                for(var index = 0; index < _textLength; index++ ){
-                    span = _spanList[index];
-                    element.appendChild(span.span);
-                }
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(animate, delay*1000);
-            }
-
-            this.stop = function(){
-                clearInterval(_intervalId);
-                if(null == _spanList){
-                    // Early return
-                    return;
-                }
-                var length = _spanList.length;
-                for(var index = 0; index < length; index++ ){
-                    _spanList[index].stop();
-                }
-            }
-
-            function onAnimationComplete(){
-                element.innerHTML = _isOut ? "" : label.text;
-                
-                var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
-                _self.onComplete(type);
-            }
-
-            this.onComplete = function (type){
-            }
-        }
-
-        // SPAN LINEAR
-        var SpanLinear = function(label, element) {
-            'strict mode'
-
-            function SpanData(char){
-                var span                    = document.createElement("span");
-                    span.style.opacity      = 0;
-                    span.innerHTML          = char;
-                this.span                   = span;
-            
-                var _intervalId;
-                
-                this.animate = function(milliseconds, delay){
-                    //span.style.transition   = "all " + delay +  "ms";
-                    var charCounter         = 0;
-                    var top                 = Math.floor(Math.random()*20)+3;
-            
-                    function change(){
-                        span.style.opacity = 1;
-                        if(charCounter < top){
-                            span.innerHTML = LETTERS[Math.floor(LETTERS.length*Math.random())];
-                            charCounter++;
-                        }else{
-                            clearInterval(_intervalId);
-                            span.innerHTML = _isOut ? char : "";
-                        }
-                    }
-                    clearInterval(_intervalId);
                     setTimeout(function(){
                         change();
                         clearInterval(_intervalId);
-                        _intervalId = setInterval(change, milliseconds/top);
+                        _intervalId = setInterval(change, milliseconds/_top);
                     }, delay);
                 }
 
@@ -276,13 +147,16 @@ function Fuji (){
             var _text;
             var _textLength;
 
+            this.isLinear   = false;
+            this.isSpinner  = false;
+
             function setAnimation(){
                 var char;
                 var span;
                 _text               = label.text;
                 _textLength         = _text.length;
                 element.innerHTML   = "";
-                unOrderList           = [];
+                orderList           = [];
                 _spanList           = [];
                 for(var index = 0; index < _textLength; index++ ){
                     char = _text.charAt(index);
@@ -290,19 +164,39 @@ function Fuji (){
                     _spanList.push(span);
                     
                     element.appendChild(span.span);
-                    unOrderList.push(index);
+                    orderList.push(index);
+                }
+                
+                if(_self.isLinear){
+                    unOrderList = orderList.slice();
+                    orderList.length = 0;
+                    return; 
                 }
 
-                animate();
+                var randomIndex;
+                unOrderList = orderList;
+                for(var index=0; index < _textLength; index++ ){
+                    randomIndex = Math.floor(orderList.length*Math.random());
+                    unOrderList.push(orderList[randomIndex]);
+                    orderList.splice(randomIndex, 1);
+                }
             }
 
             function animate(){
                 var fracc = _milliseconds / _textLength;
                 var delay = 0; 
-                for(index=0; index < _textLength; index++){
-                var span = _spanList[unOrderList[index]];
-                    span.animate(_milliseconds-delay, delay);
-                    delay += fracc;
+                if(!_isOut){
+                    for(index=0; index < _textLength; index++){
+                        var span = _spanList[unOrderList[index]];
+                            span.animate(_milliseconds-delay, delay, _self.isSpinner);
+                            delay += fracc;
+                    }
+                }else{
+                    for(index=_textLength-1; index > -1; index--){
+                        var span = _spanList[unOrderList[index]];
+                            span.animate(_milliseconds-delay, delay, _self.isSpinner);
+                            delay += fracc;
+                    }
                 }
 
                 clearInterval(_intervalId);
@@ -314,9 +208,9 @@ function Fuji (){
                 _isOut          = false;
                 _milliseconds   = seconds*1000;
                 delay           = isNumber(delay) ? delay : 0;
-
+                setAnimation()
                 clearInterval(_intervalId);
-                _intervalId = setTimeout(setAnimation, delay*1000);
+                _intervalId = setTimeout(animate, delay*1000);
             }
 
             this.playOut = function(seconds, delay){
@@ -359,12 +253,17 @@ function Fuji (){
             this.onComplete = function (type){
             }
         }
+
     }
     
     function Label (text){
-        this.ANIMATION_WORD    = "wordAnimation";
-        this.ANIMATION_RANDOM  = "randomAnimation";
-        this.ANIMATION_LINEAR  = "linearAnimation";
+        this.ANIMATION_WORD             = "wordAnimation";
+        this.ANIMATION_CHAR             = "charAnimation";
+        this.ANIMATION_RANDOM           = "randomAnimation";
+        this.ANIMATION_LINEAR           = "linearAnimation";
+        this.ANIMATION_RANDOM_SPINNER   = "randomSpinner";
+        this.ANIMATION_LINEAR_SPRINNER  = "linearSpinner";
+
         this.EVENT_IN_START    = EVENT_IN_START;
         this.EVENT_IN_END      = EVENT_IN_END;
         this.EVENT_OUT_START   = EVENT_OUT_START;
@@ -373,7 +272,7 @@ function Fuji (){
         var _self           = this;
         var _emitter        = new Emitter(this);
         var _text           = text == null ? "Label" : text;
-        var _fontFamily     = fontList[2];
+        var _fontFamily     = fontList[1];
         var _fontSize       = "36px";
         var _width          = "100px";
         var _height         = (parseFloat(_fontSize)*2)+"px";
@@ -494,9 +393,6 @@ function Fuji (){
             switch(_self.animationType){
                 //////////////////////////////
                 case _self.ANIMATION_WORD :
-                    if(null != _animator){
-                        _animator.stop();
-                    }
                     if(null == _animatorList[_self.ANIMATION_WORD]){
                         _animatorList[_self.ANIMATION_WORD] = new WordAnimation(_self, _yasashiku, _state);
                     }
@@ -504,22 +400,18 @@ function Fuji (){
                     _animator.onComplete    = onAnimationComplete;
                     break;
                 //////////////////////////////
-                case _self.ANIMATION_LINEAR :
-                    if(null == _animatorList[_self.ANIMATION_LINEAR]){
-                        _animatorList[_self.ANIMATION_LINEAR] = new SpanLinear(_self, _label);
-                    }
-                    _animator               =  _animatorList[_self.ANIMATION_LINEAR];
-                    _animator.animationType = _self.animationType
-                    _animator.text          = _text;
-                    _animator.onComplete    = onAnimationComplete;
-                    break;
-                //////////////////////////////
                 case _self.ANIMATION_RANDOM :
-                    if(null == _animatorList[_self.ANIMATION_RANDOM]){
-                        _animatorList[_self.ANIMATION_RANDOM] = new SpanRandom(_self, _label);
+                case _self.ANIMATION_LINEAR :
+                case _self.ANIMATION_RANDOM_SPINNER :
+                case _self.ANIMATION_LINEAR_SPRINNER :
+                    if(null == _animatorList[_self.ANIMATION_CHAR]){
+                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label, _yasashiku);
                     }
-                    _animator               =  _animatorList[_self.ANIMATION_RANDOM];
-                    _animator.text          = _text;
+                    _animator               =  _animatorList[_self.ANIMATION_CHAR];
+                    _animator.isLinear      =  _self.ANIMATION_LINEAR == _self.animationType || 
+                                               _self.ANIMATION_LINEAR_SPRINNER == _self.animationType;
+                    _animator.isSpinner     =  _self.ANIMATION_RANDOM_SPINNER  == _self.animationType ||
+                                               _self.ANIMATION_LINEAR_SPRINNER == _self.animationType;
                     _animator.onComplete    = onAnimationComplete;
                     break;
                 //////////////////////////////

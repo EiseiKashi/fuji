@@ -87,10 +87,6 @@ var SpanAnimation = function(label, element) {
             _charIndex = _randomIndex[_currentIndex];
             _charCounter ++;
         }else{
-            if(_spanList[_charIndex]== null)
-            {
-                debugger;
-            }
             _spanList[_charIndex].innerHTML =  _self.text.charAt(_charIndex) != " " ? char : " ";
             _spanList[_charIndex].style.opacity = 1;
         }
