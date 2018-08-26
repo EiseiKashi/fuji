@@ -87,7 +87,7 @@ function Fuji (){
         }
 
         // SPAN RANDOM
-        var CharAnimation = function(label, element, animation) {
+        var CharAnimation1 = function(label, element, animation) {
             'strict mode'
 
             function SpanData(char, isSpinner){
@@ -405,7 +405,7 @@ function Fuji (){
                 case _self.ANIMATION_RANDOM_SPINNER :
                 case _self.ANIMATION_LINEAR_SPRINNER :
                     if(null == _animatorList[_self.ANIMATION_CHAR]){
-                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label, _yasashiku);
+                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label);
                     }
                     _animator               =  _animatorList[_self.ANIMATION_CHAR];
                     _animator.isLinear      =  _self.ANIMATION_LINEAR == _self.animationType || 

@@ -104,8 +104,8 @@ window.Emitter = function(target){
 		if(null == type || type == ""){
 			return;
 		}
-		_listenerList = _listenerTypes[type];
-		if(null == _listenerList){
+		var _listenerList = _listenerTypes[type];
+		if(undefined === _listenerList){
 			return
 		}
 		data        = null == data || typeof data != OBJECT ? {} : data;
