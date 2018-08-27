@@ -10,6 +10,7 @@ function Fuji (){
     var EVENT_IN_END    = "inEnd";
     var EVENT_OUT_START = "outStart";
     var EVENT_OUT_END   = "outEnd";
+    var EVENT_BLINK_END = "blinkEnd";
 
     // ANIMATIONS
     {
@@ -301,6 +302,7 @@ function Fuji (){
         this.EVENT_IN_END      = EVENT_IN_END;
         this.EVENT_OUT_START   = EVENT_OUT_START;
         this.EVENT_OUT_END     = EVENT_OUT_END;
+        this.EVENT_BLINK_END   = EVENT_BLINK_END;
 
         var _self           = this;
         var _emitter        = new Emitter(this);
@@ -388,7 +390,7 @@ function Fuji (){
             _blinkCounter       = 0;
             _styleLabel.display = "inline-block"
             clearInterval(_idInterval);
-            _idInterval = setInterval(blinker, 100);
+            _idInterval = setInterval(blinker, 50);
         }
 
         // HELPERS
@@ -407,6 +409,7 @@ function Fuji (){
             }else{
                 if(_blinkCounter == _blinkTimes){
                     clearInterval(_idInterval);
+                    emit(_self.EVENT_BLINK_END);
                 }
                 _styleLabel.display = "inline-block";
             }
