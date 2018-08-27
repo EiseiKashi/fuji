@@ -360,12 +360,14 @@ function Fuji (){
         }
 
         this.playIn = function(seconds, delay){
-            _isOut = false;
+            _isOut          = false;
+            _self.formula   = _self.formulaIn;
             play(seconds, delay);
         }
 
         this.playOut = function(seconds, delay){
-            _isOut = true;
+            _isOut          = true;
+            _self.formula   = _self.formulaOut;
             play(seconds, delay);
         }
 

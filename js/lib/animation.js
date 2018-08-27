@@ -50,7 +50,6 @@ var CharAnimation = function(label, element) {
         }
     }
 
-
     var _self       = this;
     var _animation  = new Yasashiku();
     var _stateFrom  = {length:0};
@@ -104,33 +103,6 @@ var CharAnimation = function(label, element) {
 
     }
     
-    function onTick(event){
-        var length = Math.min(_stateFrom.length, _textLength);
-        var lengthInt = Math.floor(length);
-        var lengthDouble = (length - lengthInt);
-        
-        length = Math.floor(length + lengthDouble);
-
-        for(var index=0; index < _textLength; index++){
-            var span = _spanList[index];
-            span.setOpacity(0);
-        }
-        
-        span = null;
-
-        for(var index=0; index < lengthInt; index++){
-            var span = _spanList[unOrderList[index]];
-            span.setOpacity(1);
-            if(_self.isSpinner){
-                span.animate(event.seconds-event.lapsed);
-            }
-        }
-
-        if(null != span && _textLength != length){
-            span.setOpacity(lengthDouble);
-        }
-    }
-
     this.playIn = function(seconds, delay){
         _self.stop();
 
@@ -143,7 +115,7 @@ var CharAnimation = function(label, element) {
         delay               = isNumber(delay) ? delay : 0;
         
         clearTimeout(_idTimeout);
-        _idTimeout = setTimeout(onAnimationStart, delay);        
+        _idTimeout = setTimeout(onAnimationStart, delay*1000);        
     }
 
     this.playOut = function(seconds, delay){
@@ -155,6 +127,8 @@ var CharAnimation = function(label, element) {
         _isOut              = true;
         
         _animation.seconds  = seconds;
+        _animation.formula  = label.formula;
+        
         element.innerHTML   = "";
         
         delay               = isNumber(delay) ? delay : 0;
@@ -164,7 +138,7 @@ var CharAnimation = function(label, element) {
         }
 
         clearTimeout(_idTimeout);
-        _idTimeout = setTimeout(onAnimationStart, delay);
+        _idTimeout = setTimeout(onAnimationStart, delay*1000);
     }
 
     this.stop = function(){
@@ -189,9 +163,36 @@ var CharAnimation = function(label, element) {
         _animation.play();
     }
 
-    function onAnimationComplete(){
-        element.innerHTML = _isOut ? "" : label.text;
+    function onTick(event){
+        var length = Math.min(_stateFrom.length, _textLength);
+        var lengthInt = Math.round(length);
+        var lengthDouble = (length - lengthInt);
         
+        length = Math.floor(length + lengthDouble);
+
+        for(var index=0; index < _textLength; index++){
+            var span = _spanList[index];
+            span.setOpacity(0);
+        }
+        
+        span = null;
+        console.log(_textLength, index, lengthInt);
+        console.log(event)
+        for(var index=0; index < lengthInt; index++){
+            var span = _spanList[unOrderList[index]];
+            span.setOpacity(1);
+            if(_self.isSpinner){
+                span.animate(event.seconds-event.lapsed);
+            }
+        }
+
+        if(null != span && !event.isLast){
+            span.setOpacity(lengthDouble);
+        }
+    }
+
+    function onAnimationComplete(){
+       // element.innerHTML = _isOut ? "" : label.text;
         var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
         _self.onComplete(type);
 

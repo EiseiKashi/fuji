@@ -1404,7 +1404,7 @@ window.Canvate = function(element) {
                 _cropHeight = cropDataRender.height;
             }catch(error){
                 var name = this.name;
-                //debugger
+                //debugger check what happened
             }
             
             // FRAME RENDER
