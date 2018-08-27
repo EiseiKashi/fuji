@@ -1,7 +1,8 @@
 var fuji = new Fuji();
 
 function onEndComplete(event){
-    event.target.playOut(10, 5);
+    label.blink(3);
+    //event.target.playOut(10, 5);
 }
 
 var label              = fuji.createLabel("Ayumi Kotegawa");

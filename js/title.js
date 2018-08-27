@@ -2,6 +2,7 @@ var fuji = new Fuji();
 
 function onEndComplete(event){
     event.target.playOut(1.2, 5);
+    label.blink(3);
 }
 
 

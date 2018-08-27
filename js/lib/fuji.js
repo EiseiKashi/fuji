@@ -196,7 +196,6 @@ function Fuji (){
 
                 _isOut              = false;
                 _animation.seconds  = seconds;
-                console.log("START  ///////////", _animation.seconds);
                 element.innerHTML   = "";
                 setAnimation();
 
@@ -264,8 +263,7 @@ function Fuji (){
                 }
                 
                 span = null;
-                console.log(_textLength, index, lengthInt);
-                console.log(event)
+                
                 for(var index=0; index < lengthInt; index++){
                     var span = _spanList[unOrderList[index]];
                     span.setOpacity(1);
@@ -280,11 +278,9 @@ function Fuji (){
             }
 
             function onAnimationComplete(){
-            // element.innerHTML = _isOut ? "" : label.text;
+                element.innerHTML = _isOut ? "" : label.text;
                 var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
                 _self.onComplete(type);
-
-                console.log("END  ///////////");
             }
 
             this.onComplete = function (type){
@@ -325,6 +321,9 @@ function Fuji (){
         var _container;
         var _styleContainer;
         var _styleLabel;
+        var _idInterval;
+        var _blinkCounter;
+        var _blinkTimes;
         
         this.text           = _text;
         this.fontFamily     = _fontFamily;
@@ -357,6 +356,7 @@ function Fuji (){
 
         _yasashiku.add(_styleLabel, _state);
 
+        // INTERFACE
         this.appendTo = function (element){
             if(null != element && element != _element && typeof element.appendChild == "function"){
                 _element = element;
@@ -375,7 +375,46 @@ function Fuji (){
             play(seconds, delay);
         }
 
+        this.stop = function(){
+            _styleLabel.display = "inline-block"
+            clearInterval(_idInterval);
+            if(null == _animator){
+                _animator.stop();
+            }
+        }
+
+        this.blink = function(times){
+            _blinkTimes         = isNumber(times) ? Math.round(times) : 2;
+            _blinkCounter       = 0;
+            _styleLabel.display = "inline-block"
+            clearInterval(_idInterval);
+            _idInterval = setInterval(blinker, 100);
+        }
+
+        // HELPERS
+        this.addEventListener = function(type, listener, context){
+            _emitter.addEventListener(type, listener, context);
+        }
+
+        this.removeEventListener = function(type, listener, context){
+            _emitter.removeEventListener(type, listener, context);
+        }
+
+        function blinker(){
+            if(_styleLabel.display == "inline-block"){
+                _styleLabel.display = "none";
+                _blinkCounter++;
+            }else{
+                if(_blinkCounter == _blinkTimes){
+                    clearInterval(_idInterval);
+                }
+                _styleLabel.display = "inline-block";
+            }
+        }
+
         function play (seconds, delay){
+            clearInterval(_idInterval);
+            _styleLabel.display == "inline-block";
             
             if(null != _self.text){
                 _text = _self.text;
@@ -470,15 +509,6 @@ function Fuji (){
                     _animator.playIn(seconds, delay);
                 }
             }
-        }
-
-        // Event emitter
-        this.addEventListener = function(type, listener, context){
-            _emitter.addEventListener(type, listener, context);
-        }
-
-        this.removeEventListener = function(type, listener, context){
-            _emitter.removeEventListener(type, listener, context);
         }
 
         function onAnimationComplete (type){

@@ -108,7 +108,6 @@ var CharAnimation = function(label, element) {
 
         _isOut              = false;
         _animation.seconds  = seconds;
-        console.log("START  ///////////", _animation.seconds);
         element.innerHTML   = "";
         setAnimation();
 
@@ -176,8 +175,7 @@ var CharAnimation = function(label, element) {
         }
         
         span = null;
-        console.log(_textLength, index, lengthInt);
-        console.log(event)
+        
         for(var index=0; index < lengthInt; index++){
             var span = _spanList[unOrderList[index]];
             span.setOpacity(1);
@@ -195,8 +193,6 @@ var CharAnimation = function(label, element) {
        // element.innerHTML = _isOut ? "" : label.text;
         var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
         _self.onComplete(type);
-
-        console.log("END  ///////////");
     }
 
     this.onComplete = function (type){
