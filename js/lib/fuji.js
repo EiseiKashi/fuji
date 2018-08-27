@@ -85,24 +85,25 @@ function Fuji (){
                 _self.onComplete(type);
             }
         }
-
+        /*
         // SPAN RANDOM
-        var CharAnimation1 = function(label, element, animation) {
+        var CharAnimation = function(label, element) {
             'strict mode'
 
             function SpanData(char, isSpinner){
-                var span                = document.createElement("span");
-                    span.style.opacity  = 0;
-                    span.innerHTML      = char;
-                this.span               = span;
+                var _span               = document.createElement("span");
+                    _span.style.opacity = 0;
+                    _span.innerHTML     = char;
+                this.span               = _span;
                 
                 var _isSpinner          = isSpinner;
                 var _intervalId;
                 var _charCounter        = 0;
                 var _top                = 0;
-                
+                var _isPlaying          = false;
+
                 function change(){
-                    span.style.opacity = _isOut ? 0 : 1;
+                    _span.style.opacity = _isOut ? 0 : 1;
                     if(_charCounter < _top){
                         var charTmp = char; 
                         if(_isSpinner){
@@ -110,43 +111,57 @@ function Fuji (){
                         }else{
                             charTmp =  char;
                         }
-                        span.innerHTML = charTmp; 
+                        _span.innerHTML = charTmp; 
                         _charCounter++;
                     }else{
                         clearInterval(_intervalId);
-                        span.innerHTML = _isOut ? "" : char;
+                        _span.innerHTML = _isOut ? "" : char;
                     }
                 }
 
-                this.animate = function(milliseconds, delay, isSpinner){
-                    clearInterval(_intervalId);
-                    _isSpinner              = isSpinner;
-                    span.style.transition   = "all " + milliseconds + "ms";
+                this.setOpacity = function(opacity){
+                    _span.style.opacity = opacity;
+                }
 
+                this.animate = function(seconds){
+                    if(_isPlaying){
+                        return;
+                    }
+                    clearInterval(_intervalId);
+                    _isPlaying      = true;
+                    _isSpinner      = isSpinner;
                     _charCounter    = 0;
-                    _top            = Math.floor(Math.random()*20)+3;
+                    _top            = Math.floor(Math.random()*(seconds*10));
                     
-                    setTimeout(function(){
-                        change();
-                        clearInterval(_intervalId);
-                        _intervalId = setInterval(change, milliseconds/_top);
-                    }, delay);
+                    change();
+                    clearInterval(_intervalId);
+                    _intervalId = setInterval(change, 100);
                 }
 
                 this.stop = function(){
                     clearInterval(_intervalId);
-                    span.innerHTML = char;
+                    _span.innerHTML = char;
+                    _isPlaying = false;
                 }
             }
 
-            var _self = this;
+
+            var _self       = this;
+            var _animation  = new Yasashiku();
+            var _stateFrom  = {length:0};
+            var _stateTo    = {length:0};
+                _animation.add(_stateFrom, _stateTo);
+                _animation.addEventListener(_animation.EVENT_TICK, onTick);
+                _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
+            
             var _isOut;
             var _milliseconds;
+            var _span;
             var _spanList;
             var _intervalId;
             var _text;
             var _textLength;
-
+            
             this.isLinear   = false;
             this.isSpinner  = false;
 
@@ -166,7 +181,15 @@ function Fuji (){
                     element.appendChild(span.span);
                     orderList.push(index);
                 }
-                
+
+                _stateFrom.length   = _isOut ? _textLength  : 0;
+                _stateTo.length     = _isOut ? 0            : _textLength;
+
+                _stateFrom.opacity  = _isOut ? 1  : 0;
+                _stateTo.opacity    = _isOut ? 0  : 1;
+
+                _animation.formula  = label.formula;
+
                 if(_self.isLinear){
                     unOrderList = orderList.slice();
                     orderList.length = 0;
@@ -180,59 +203,65 @@ function Fuji (){
                     unOrderList.push(orderList[randomIndex]);
                     orderList.splice(randomIndex, 1);
                 }
-            }
 
-            function animate(){
-                var fracc = _milliseconds / _textLength;
-                var delay = 0; 
-                if(!_isOut){
-                    for(index=0; index < _textLength; index++){
-                        var span = _spanList[unOrderList[index]];
-                            span.animate(_milliseconds-delay, delay, _self.isSpinner);
-                            delay += fracc;
-                    }
-                }else{
-                    for(index=_textLength-1; index > -1; index--){
-                        var span = _spanList[unOrderList[index]];
-                            span.animate(_milliseconds-delay, delay, _self.isSpinner);
-                            delay += fracc;
+            }
+            
+            function onTick(event){
+                var length = Math.min(_stateFrom.length, _textLength);
+                var lengthInt = Math.floor(length);
+                var lengthDouble = (length - lengthInt);
+                
+                length = Math.floor(length + lengthDouble);
+
+                for(var index=0; index < _textLength; index++){
+                    var span = _spanList[index];
+                    span.setOpacity(0);
+                }
+                
+                span = null;
+
+                for(var index=0; index < lengthInt; index++){
+                    var span = _spanList[index];
+                    span.setOpacity(1);
+                    if(_self.isSpinner){
+                        span.animate(event.seconds-event.lapsed);
                     }
                 }
 
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(onAnimationComplete, _milliseconds);
+                if(null != span && _textLength != length){
+                    span.setOpacity(lengthDouble);
+                }
             }
 
             this.playIn = function(seconds, delay){
                 _self.stop();
-                _isOut          = false;
-                _milliseconds   = seconds*1000;
-                delay           = isNumber(delay) ? delay : 0;
-                setAnimation()
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(animate, delay*1000);
+
+                _isOut              = false;
+                _animation.seconds  = seconds;
+                console.log("START  ///////////", _animation.seconds);
+                setAnimation();
+                _animation.play();
             }
 
             this.playOut = function(seconds, delay){
                 if(null == _spanList){
                     return;
                 }
-                this.stop();
-                _isOut          = true;
-                _milliseconds   = seconds*1000;
-                delay           = isNumber(delay) ? delay : 0;
-                element.innerHTML = "";
-                var length = _spanList.length;
+
+                _self.stop();
+                _isOut              = true;
+                
+                _animation.seconds  = seconds;
+                delay               = isNumber(delay) ? delay : 0;
+                element.innerHTML   = "";
+
                 for(var index = 0; index < _textLength; index++ ){
-                    span = _spanList[index];
-                    element.appendChild(span.span);
+                    _span = _spanList[index];
+                    element.appendChild(_span.span);
                 }
-                clearInterval(_intervalId);
-                _intervalId = setTimeout(animate, delay*1000);
             }
 
             this.stop = function(){
-                clearInterval(_intervalId);
                 if(null == _spanList){
                     // Early return
                     return;
@@ -241,6 +270,7 @@ function Fuji (){
                 for(var index = 0; index < length; index++ ){
                     _spanList[index].stop();
                 }
+                _animation.stop();
             }
 
             function onAnimationComplete(){
@@ -248,12 +278,15 @@ function Fuji (){
                 
                 var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
                 _self.onComplete(type);
+
+                console.log("END  ///////////");
             }
 
             this.onComplete = function (type){
             }
         }
-
+        var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
+        */
     }
     
     function Label (text){
@@ -338,38 +371,45 @@ function Fuji (){
 
         function play (seconds, delay){
             
-            if(_self.text != _text){
+            if(null != _self.text){
                 _text = _self.text;
+            }else{
+                _self.text = _text;
             }
             
-            if(_self.fontFamily != _fontFamily){
+            if(null != _self.fontFamily){
                 _fontFamily = _self.fontFamily;
+            }else{
+                _self.fontFamily = _fontFamily;
             }
             
-            if(_self.fontSize != _fontSize){
-                if(isNumber(parseFloat(_fontSize))){
-                    _fontSize = _self.fontSize;
-                }
+
+            if(isNumber(parseFloat(_fontSize))){
+                _fontSize = _self.fontSize;
+            }else{
+                _self.fontSize = _fontSize;
             }
             
-            if(_self.width != _width){
-                if(isNumber(parseFloat(_self.width))){
-                    _width = _self.width;
-                }
+            if(isNumber(parseFloat(_self.width))){
+                _width = _self.width;
+            }else{
+                _self.width = _width;
             }
             
-            if(_self.height != _height){
-                if(isNumber(parseFloat(_self.height))){
-                    _height = _self.height;
-                }
+            if(isNumber(parseFloat(_self.height))){
+                _height = _self.height;
+            }else{
+                _self.height = _height;
             }
 
-            _self.formula = _self.formulaIn;
-            if(_self.formula != _formula){
+            if(null != _self.formula){
                 _formula = _self.formula;
+            }else{
+                _self.formula = _formula;
             }
 
             _yasashiku.formula          = _formula;
+            _self.formula               = _yasashiku.formula; 
             _from                       = _self.from;
             _label.innerHTML            = _text;
             _styleContainer.fontFamily  = _fontFamily;

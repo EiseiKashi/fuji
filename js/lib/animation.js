@@ -1,27 +1,22 @@
 // SPAN RANDOM
-var CharAnimation = function(label, element, formula) {
+var CharAnimation = function(label, element) {
     'strict mode'
 
-    function SpanData(char, isSpinner){
+    function SpanData(char){
         var _span               = document.createElement("span");
             _span.style.opacity = 0;
             _span.innerHTML     = char;
         this.span               = _span;
-        
-        var _isSpinner          = isSpinner;
+
         var _intervalId;
         var _charCounter        = 0;
         var _top                = 0;
+        var _isPlaying          = false;
 
-        function change(){
+        function spine(){
             _span.style.opacity = _isOut ? 0 : 1;
             if(_charCounter < _top){
-                var charTmp = char; 
-                if(_isSpinner){
-                    charTmp = LETTERS[Math.floor(LETTERS.length*Math.random())];
-                }else{
-                    charTmp =  char;
-                }
+                charTmp = LETTERS[Math.floor(LETTERS.length*Math.random())];
                 _span.innerHTML = charTmp; 
                 _charCounter++;
             }else{
@@ -30,30 +25,33 @@ var CharAnimation = function(label, element, formula) {
             }
         }
 
-        this.animate = function(milliseconds, delay, isSpinner){
-            clearInterval(_intervalId);
-            _isSpinner              = isSpinner;
-            _span.style.transition  = "all " + milliseconds + "ms";
+        this.setOpacity = function(opacity){
+            _span.style.opacity = opacity;
+        }
 
+        this.animate = function(seconds){
+            if(_isPlaying){
+                return;
+            }
+            clearInterval(_intervalId);
+            _isPlaying      = true;
             _charCounter    = 0;
-            _top            = Math.floor(Math.random()*20)+3;
+            _top            = Math.floor(Math.random()*(seconds*10));
             
-            setTimeout(function(){
-                change();
-                clearInterval(_intervalId);
-                _intervalId = setInterval(change, milliseconds/_top);
-            }, delay);
+            spine();
+            clearInterval(_intervalId);
+            _intervalId = setInterval(spine, 100);
         }
 
         this.stop = function(){
             clearInterval(_intervalId);
             _span.innerHTML = char;
+            _isPlaying = false;
         }
     }
 
 
     var _self       = this;
-    var _formula    = formula;
     var _animation  = new Yasashiku();
     var _stateFrom  = {length:0};
     var _stateTo    = {length:0};
@@ -62,12 +60,11 @@ var CharAnimation = function(label, element, formula) {
         _animation.addEventListener(_animation.EVENT_COMPLETE, onAnimationComplete);
     
     var _isOut;
-    var _milliseconds;
     var _span;
     var _spanList;
-    var _intervalId;
     var _text;
     var _textLength;
+    var _idTimeout;
     
     this.isLinear   = false;
     this.isSpinner  = false;
@@ -89,8 +86,7 @@ var CharAnimation = function(label, element, formula) {
             orderList.push(index);
         }
 
-        _stateFrom.length   = _isOut ? _textLength  : 0;
-        _stateTo.length     = _isOut ? 0            : _textLength;
+        _animation.formula  = label.formula;
         
         if(_self.isLinear){
             unOrderList = orderList.slice();
@@ -107,26 +103,32 @@ var CharAnimation = function(label, element, formula) {
         }
 
     }
-
+    
     function onTick(event){
-        console.log(_stateFrom.length);
-        /*
-        var fracc = _milliseconds / _textLength;
-        var delay = 0; 
-        if(!_isOut){
-            for(index=0; index < _textLength; index++){
-                var span = _spanList[unOrderList[index]];
-                    span.animate(_milliseconds-delay, delay, _self.isSpinner);
-                    delay += fracc;
-            }
-        }else{
-            for(index=_textLength-1; index > -1; index--){
-                var span = _spanList[unOrderList[index]];
-                    span.animate(_milliseconds-delay, delay, _self.isSpinner);
-                    delay += fracc;
+        var length = Math.min(_stateFrom.length, _textLength);
+        var lengthInt = Math.floor(length);
+        var lengthDouble = (length - lengthInt);
+        
+        length = Math.floor(length + lengthDouble);
+
+        for(var index=0; index < _textLength; index++){
+            var span = _spanList[index];
+            span.setOpacity(0);
+        }
+        
+        span = null;
+
+        for(var index=0; index < lengthInt; index++){
+            var span = _spanList[unOrderList[index]];
+            span.setOpacity(1);
+            if(_self.isSpinner){
+                span.animate(event.seconds-event.lapsed);
             }
         }
-        */
+
+        if(null != span && _textLength != length){
+            span.setOpacity(lengthDouble);
+        }
     }
 
     this.playIn = function(seconds, delay){
@@ -134,9 +136,14 @@ var CharAnimation = function(label, element, formula) {
 
         _isOut              = false;
         _animation.seconds  = seconds;
-        console.log("START  ///////////");
+        console.log("START  ///////////", _animation.seconds);
+        element.innerHTML   = "";
         setAnimation();
-        _animation.play();
+
+        delay               = isNumber(delay) ? delay : 0;
+        
+        clearTimeout(_idTimeout);
+        _idTimeout = setTimeout(onAnimationStart, delay);        
     }
 
     this.playOut = function(seconds, delay){
@@ -148,16 +155,20 @@ var CharAnimation = function(label, element, formula) {
         _isOut              = true;
         
         _animation.seconds  = seconds;
-        delay               = isNumber(delay) ? delay : 0;
         element.innerHTML   = "";
-
+        
+        delay               = isNumber(delay) ? delay : 0;
         for(var index = 0; index < _textLength; index++ ){
             _span = _spanList[index];
             element.appendChild(_span.span);
         }
+
+        clearTimeout(_idTimeout);
+        _idTimeout = setTimeout(onAnimationStart, delay);
     }
 
     this.stop = function(){
+        clearTimeout(_idTimeout);
         if(null == _spanList){
             // Early return
             return;
@@ -167,6 +178,15 @@ var CharAnimation = function(label, element, formula) {
             _spanList[index].stop();
         }
         _animation.stop();
+    }
+
+    function onAnimationStart(){
+        _stateFrom.length   = _isOut ? _textLength  : 0;
+        _stateTo.length     = _isOut ? 0            : _textLength;
+        _stateFrom.opacity  = _isOut ? 1            : 0;
+        _stateTo.opacity    = _isOut ? 0            : 1;
+
+        _animation.play();
     }
 
     function onAnimationComplete(){

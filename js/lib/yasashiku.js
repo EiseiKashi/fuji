@@ -243,7 +243,9 @@ function Yasashiku (){
         }
 
         this.play = function(seconds, delay){
-            this.seconds    = seconds;
+            if(isNumber(seconds)){
+                _self.seconds = seconds;
+            }
             cancelAnimationFrame(_idTime);
             if(!isNumber(delay)){
                 delay = 0;
@@ -273,11 +275,11 @@ function Yasashiku (){
 
         var emit = function(type){
             _emitter.emit(type, {   
-                                     ratio           : _ratio
-                                    ,milliseconds    : _duration 
-                                    ,lapsed          : _lapsed
-                                    ,isLast          : _isLast
-                                    ,isPlaying       : _isActive
+                                     ratio      : _ratio
+                                    ,seconds    : _duration/1000
+                                    ,lapsed     : _lapsed/1000
+                                    ,isLast     : _isLast
+                                    ,isPlaying  : _isActive
                                 });
         }
 
@@ -351,8 +353,8 @@ function Yasashiku (){
             if(!_isActive){
                 _isLast = true;
                 _self.stop();
-                emit(_self.EVENT_COMPLETE);
                 emit(_self.EVENT_TICK);
+                emit(_self.EVENT_COMPLETE);
                 _isLast = false;
                 cancelAnimationFrame(_idTime);
             }else{
