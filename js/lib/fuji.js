@@ -1,5 +1,16 @@
 function Fuji (){
     'strict mode'
+
+    if (!Array.isArray) {
+        Array.isArray = function(arg) {
+            return Object.prototype.toString.call(arg) === '[object Array]';
+        };
+    }
+
+    Array.isNotArray = function(arg) {
+        return !(Object.prototype.toString.call(arg) === '[object Array]');
+    };
+    
     var fontList = [
         "'Rajdhani',    sans-serif"
        ,"'Rationale',   sans-serif"
@@ -16,10 +27,10 @@ function Fuji (){
     {
         var LETTERS = "ABCEDEFGHIJKLNOPQRSTUVWXYZ 123456789abcdeefghijklnopqrstuvwxyz".split("");
         // STYLE ANIMATION
-        var WordAnimation = function(label, animation, state) {
+        var WordAnimation = function(target, animation, state) {
             'strict mode'
             var _self       = this;
-            var _styleLabel = label.styleLabel;
+            var _styleTarget = target.styleTarget;
             var _from;
 
             var _isOut;
@@ -28,23 +39,26 @@ function Fuji (){
             animation.addEventListener(animation.EVENT_COMPLETE, onAnimationComplete);
 
             this.playIn = function(seconds, delay){
-                _isOut = false;
+                _seconds    = isNumber(seconds) ? seconds : _seconds;
+                _isOut      = false;
 
                 setAnimation();
                 
                 state[_from]        = 0+"px";
                 state.opacity       = 1;
-                _styleLabel[_from]  = _position;
-                animation.play(seconds, delay);
+                _styleTarget[_from]  = _position;
+                animation.play(_seconds, delay);
             }
 
             this.playOut = function(seconds, delay){
-                _isOut = true;
+                _seconds    = isNumber(seconds) ? seconds : _seconds;
+                _isOut      = true;
+
                 setAnimation();
 
                 state[_from]    = _position;
                 state.opacity   = 0;
-                animation.play(seconds, delay);
+                animation.play(_seconds, delay);
             }
 
             this.stop = function(){
@@ -55,40 +69,40 @@ function Fuji (){
             }
             
             function setAnimation (){
-                _from = label.from;
+                _from = target.from;
                 switch(_from){
                     case "top" :
-                        _position   = "-"+label.height;        
+                        _position   = "-"+target.height;        
                     break;
                     
                     case "right" :
                         _from       = "left";
-                        _position   = label.width;      
+                        _position   = target.width;      
                     break;
                     
                     case "bottom" :
                         _from       = "top";
-                        _position   = label.height;    
+                        _position   = target.height;    
                     break;
                     
                     case "left" :
-                        _position   = "-"+ label.width;
+                        _position   = "-"+ target.width;
                     break;
 
                 default :
-                        _position   = "-"+label.width;
+                        _position   = "-"+target.width;
                     break;
                 }
             }
 
             function onAnimationComplete(){
-                var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
+                var type = _isOut ? target.EVENT_OUT_END : target.EVENT_IN_END;
                 _self.onComplete(type);
             }
         }
         
         // SPAN RANDOM
-        var CharAnimation = function(label, element) {
+        var CharAnimation = function(target, element) {
             'strict mode'
 
             function SpanData(char){
@@ -160,7 +174,7 @@ function Fuji (){
             function setAnimation(){
                 var char;
                 var span;
-                _text               = label.text;
+                _text               = target.text;
                 _textLength         = _text.length;
                 element.innerHTML   = "";
                 orderList           = [];
@@ -174,7 +188,7 @@ function Fuji (){
                     orderList.push(index);
                 }
 
-                _animation.formula  = label.formula;
+                _animation.formula  = target.formula;
                 
                 if(_self.isLinear){
                     unOrderList = orderList.slice();
@@ -215,7 +229,7 @@ function Fuji (){
                 _isOut              = true;
                 
                 _animation.seconds  = seconds;
-                _animation.formula  = label.formula;
+                _animation.formula  = target.formula;
                 
                 element.innerHTML   = "";
                 
@@ -279,8 +293,8 @@ function Fuji (){
             }
 
             function onAnimationComplete(){
-                element.innerHTML = _isOut ? "" : label.text;
-                var type = _isOut ? label.EVENT_OUT_END : label.EVENT_IN_END;
+                element.innerHTML = _isOut ? "" : target.text;
+                var type = _isOut ? target.EVENT_OUT_END : target.EVENT_IN_END;
                 _self.onComplete(type);
             }
 
@@ -313,19 +327,20 @@ function Fuji (){
         var _height         = (parseFloat(_fontSize)*2)+"px";
         var _from           = "left";
         var _formula        = "outBack";
+        var _seconds        = .8;
         var _element        = document.body;
         var _yasashiku      = new Yasashiku();
         var _animatorList   = {}
         var _state          = {};
         var _animator;
         var _isOut;
-        var _label;
-        var _container;
-        var _styleContainer;
-        var _styleLabel;
+        var _target;
         var _idInterval;
         var _blinkCounter;
         var _blinkTimes;
+        var _container;
+        var _styleContainer;
+        var _styleTarget;
         
         this.text           = _text;
         this.fontFamily     = _fontFamily;
@@ -333,17 +348,17 @@ function Fuji (){
         this.width          = _width;
         this.height         = _height;
         this.from           = _from;
-        this.animationType  = "word";
+        this.animationType  = _self.ANIMATION_LINEAR_SPRINNER;
         this.formula        = _formula;
         this.formulaIn;
         this.formulaOut;
-        this.styleLabel;
+        this.styleTarget;
         this.styleContainer;
         
-        _label                      = document.createElement("fuji-label");
-        _styleLabel                 = _label.style; 
-        _styleLabel.display         = "inline-block";
-        _styleLabel.position        = "relative";
+        _target                     = document.createElement("fuji-label");
+        _styleTarget                = _target.style; 
+        _styleTarget.display        = "inline-block";
+        _styleTarget.position       = "relative";
         
         _container                  = document.createElement("fuji-container");
         _styleContainer             = _container.style;
@@ -351,12 +366,12 @@ function Fuji (){
         _styleContainer.position    = "relative";
         _styleContainer.overflow    = "hidden";
 
-        _container.appendChild(_label);
+        _container.appendChild(_target);
 
-        this.styleLabel             = _styleLabel;
+        this.styleTarget            = _styleTarget;
         this.styleContainer         = _styleContainer;
 
-        _yasashiku.add(_styleLabel, _state);
+        _yasashiku.add(_styleTarget, _state);
 
         // INTERFACE
         this.appendTo = function (element){
@@ -378,7 +393,7 @@ function Fuji (){
         }
 
         this.stop = function(){
-            _styleLabel.display = "inline-block"
+            _styleTarget.display = "inline-block"
             clearInterval(_idInterval);
             if(null == _animator){
                 _animator.stop();
@@ -386,9 +401,9 @@ function Fuji (){
         }
 
         this.blink = function(times){
-            _blinkTimes         = isNumber(times) ? Math.round(times) : 2;
-            _blinkCounter       = 0;
-            _styleLabel.display = "inline-block"
+            _blinkTimes             = isNumber(times) ? Math.round(times) : 2;
+            _blinkCounter           = 0;
+            _styleTarget.display    = "inline-block"
             clearInterval(_idInterval);
             _idInterval = setInterval(blinker, 50);
         }
@@ -403,21 +418,21 @@ function Fuji (){
         }
 
         function blinker(){
-            if(_styleLabel.display == "inline-block"){
-                _styleLabel.display = "none";
+            if(_styleTarget.display == "inline-block"){
+                _styleTarget.display = "none";
                 _blinkCounter++;
             }else{
                 if(_blinkCounter == _blinkTimes){
                     clearInterval(_idInterval);
                     emit(_self.EVENT_BLINK_END);
                 }
-                _styleLabel.display = "inline-block";
+                _styleTarget.display = "inline-block";
             }
         }
 
         function play (seconds, delay){
             clearInterval(_idInterval);
-            _styleLabel.display == "inline-block";
+            _styleTarget.display == "inline-block";
             
             if(null != _self.text){
                 _text = _self.text;
@@ -459,7 +474,7 @@ function Fuji (){
             _yasashiku.formula          = _formula;
             _self.formula               = _yasashiku.formula; 
             _from                       = _self.from;
-            _label.innerHTML            = _text;
+            _target.innerHTML           = _text;
             _styleContainer.fontFamily  = _fontFamily;
             _styleContainer.fontSize    = _fontSize;
             _styleContainer.width       = _width;
@@ -493,7 +508,7 @@ function Fuji (){
                 case _self.ANIMATION_RANDOM_SPINNER :
                 case _self.ANIMATION_LINEAR_SPRINNER :
                     if(null == _animatorList[_self.ANIMATION_CHAR]){
-                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _label);
+                        _animatorList[_self.ANIMATION_CHAR] = new CharAnimation(_self, _target);
                     }
                     _animator               =  _animatorList[_self.ANIMATION_CHAR];
                     _animator.isLinear      =  _self.ANIMATION_LINEAR == _self.animationType || 
@@ -524,8 +539,14 @@ function Fuji (){
     }
 
     this.createLabel = function(text, container){
-        var label = new Label(text);
-            label.appendTo(container);
-        return label;
+        var target = new Label(text);
+            target.appendTo(container);
+        return target;
+    }
+
+    this.createPanel = function(width, height, background, container){
+        var target = new Panel(width, height, background);
+            target.appendTo(container);
+        return target;
     }
 }
