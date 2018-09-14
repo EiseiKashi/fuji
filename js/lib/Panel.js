@@ -94,7 +94,7 @@ function Panel (width, height, background){
     var _height         = "100px";
     var _background     = "grey";
     var _from           = "left";
-    var _formula        = "outBack";
+    var _formula        = "inOutQuad";
     var _element        = document.body;
     var _yasashiku      = new Yasashiku();
     var _animatorList   = {}

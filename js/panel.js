@@ -5,4 +5,5 @@ var EVENT_OUT_END   = "outEnd";
 var EVENT_BLINK_END = "blinkEnd";
 
 var panel = fuji.createPanel();
-    panel.playIn(.8);
+    panel.from = "top";
+    panel.playIn(2);

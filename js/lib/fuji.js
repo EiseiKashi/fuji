@@ -326,7 +326,7 @@ function Fuji (){
         var _width          = "100px";
         var _height         = (parseFloat(_fontSize)*2)+"px";
         var _from           = "left";
-        var _formula        = "outBack";
+        var _formula        = "inOutQuad";
         var _seconds        = .8;
         var _element        = document.body;
         var _yasashiku      = new Yasashiku();
